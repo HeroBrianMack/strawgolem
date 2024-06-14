@@ -30,7 +30,7 @@ side = "BOTH"
 modId = "tlib"
 mandatory = true
 versionRange = "*"
-ordering = "BEFORE"
+ordering = "AFTER"
 side = "BOTH"
 [[dependencies.strawgolem]]
 modId = "geckolib3"
