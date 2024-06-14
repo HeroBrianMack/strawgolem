@@ -17,6 +17,7 @@ import com.t2pellet.strawgolem.registry.StrawgolemSounds;
 import com.t2pellet.tlib.Services;
 import com.t2pellet.tlib.entity.capability.api.CapabilityManager;
 import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -65,6 +66,8 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
     // Synched Data
     private static final EntityDataAccessor<Boolean> IS_SCARED = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HAS_HAT = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HARVESTING_ITEM = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HARVESTING_BLOCK = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
 
     // Capabilities
     CapabilityManager capabilities = CapabilityManager.newInstance(this);
@@ -73,6 +76,9 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
     private final Harvester harvester;
     private final Deliverer deliverer;
     private final Tether tether;
+
+    // Misc
+    private boolean isFirstTick = true;
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
@@ -96,6 +102,8 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
         super.defineSynchedData();
         this.entityData.define(IS_SCARED, false);
         this.entityData.define(HAS_HAT, false);
+        this.entityData.define(HARVESTING_ITEM, false);
+        this.entityData.define(HARVESTING_BLOCK, false);
     }
 
     /* AI */
@@ -123,14 +131,6 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
     }
 
-    public boolean isScared() {
-        return entityData.get(IS_SCARED);
-    }
-
-    public void setScared(boolean isScared) {
-        this.entityData.set(IS_SCARED, isScared);
-    }
-
     /* Base Logic */
 
     @Override
@@ -153,12 +153,25 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
                 if (StrawgolemConfig.Lifespan.rainAcceleratesDecay.get()) getDecay().decay();
             }
         }
+        if (isFirstTick) {
+            getHarvester().findHarvestables();
+            isFirstTick = false;
+        }
     }
 
     private void baseCommonTick() {
         if (getDecay().getState() == DecayState.DYING && getRandom().nextInt(StrawgolemConfig.Visual.dyingGolemFlyChance.get()) == 0) {
             spawnFlyParticle();
         }
+    }
+
+    @Override
+    public void teleportTo(double x, double y, double z) {
+        super.teleportTo(x, y, z);
+        getTether().update(new BlockPos(x, y, z));
+        getHarvester().clearHarvest();
+        getHarvester().clearQueue();
+        getHarvester().findHarvestables();
     }
 
     @Override
@@ -252,8 +265,32 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
         return getSqrMovement() >= WALK_DISTANCE;
     }
 
+    public boolean isPickingUpItem() {
+        return entityData.get(HARVESTING_ITEM);
+    }
+
+    public boolean isPickingUpBlock() {
+        return entityData.get(HARVESTING_BLOCK);
+    }
+
+    public void setPickingUpItem(boolean isPickingUpItem) {
+        entityData.set(HARVESTING_ITEM, isPickingUpItem);
+    }
+
+    public void setPickingUpBlock(boolean isPickingUpBlock) {
+        entityData.set(HARVESTING_BLOCK, isPickingUpBlock);
+    }
+
     public boolean isInCold() {
         return level.getBiome(blockPosition()).value().getBaseTemperature() < 0.15F;
+    }
+
+    public boolean isScared() {
+        return entityData.get(IS_SCARED);
+    }
+
+    public void setScared(boolean isScared) {
+        this.entityData.set(IS_SCARED, isScared);
     }
 
 

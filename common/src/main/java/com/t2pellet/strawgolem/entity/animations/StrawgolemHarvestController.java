@@ -8,28 +8,32 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 
 public class StrawgolemHarvestController extends StrawgolemAnimationController {
 
+    public static final AnimationBuilder HARVEST_BLOCK_ANIM = new AnimationBuilder().addAnimation("harvest_block");
+    public static final AnimationBuilder HARVEST_ITEM_ANIM = new AnimationBuilder().addAnimation("harvest_item");
+
     private static PlayState predicate(AnimationEvent<StrawGolem> event) {
-        boolean isHarvesting = event.getAnimatable().getHarvester().isHarvesting();
-        if (isHarvesting) {
-            AnimationBuilder builder = new AnimationBuilder();
-            // Appropriate animation for regular crop or gourd crop
-            if (event.getAnimatable().getHarvester().isHarvestingBlock()) {
-                if (StrawgolemConfig.Visual.showHarvestBlockAnimation.get()) builder.addAnimation("harvest_block");
-                else event.getAnimatable().getHarvester().completeHarvest(); // skip harvesting animation if disabled
-            } else {
-                if (StrawgolemConfig.Visual.showHarvestItemAnimation.get()) builder.addAnimation("harvest_item");
-                else event.getAnimatable().getHarvester().completeHarvest(); // skip harvesting animation if disabled
+        // Appropriate animation for regular crop or gourd crop
+        if (event.getAnimatable().isPickingUpBlock()) {
+            if (StrawgolemConfig.Visual.showHarvestBlockAnimation.get()) {
+                event.getController().setAnimation(HARVEST_BLOCK_ANIM);
+                return PlayState.CONTINUE;
             }
-            event.getController().setAnimation(builder);
-        } else event.getController().clearAnimationCache();
-        return isHarvesting ? PlayState.CONTINUE : PlayState.STOP;
+        } else if (event.getAnimatable().isPickingUpItem()) {
+            if (StrawgolemConfig.Visual.showHarvestItemAnimation.get()) {
+                event.getController().setAnimation(HARVEST_ITEM_ANIM);
+                return PlayState.CONTINUE;
+            }
+        }
+        event.getController().markNeedsReload();
+        return PlayState.STOP;
     }
 
     public StrawgolemHarvestController(StrawGolem animatable) {
         super(animatable, "harvest", StrawgolemHarvestController::predicate);
         registerCustomInstructionListener(event -> {
             if (event.instructions.equals("completeHarvest")) {
-                animatable.getHarvester().completeHarvest();
+                animatable.setPickingUpBlock(false);
+                animatable.setPickingUpItem(false);
             }
         });
     }

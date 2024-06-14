@@ -1,5 +1,7 @@
 package com.t2pellet.strawgolem.entity.capabilities.harvester;
 
+import com.t2pellet.strawgolem.StrawgolemConfig;
+import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.strawgolem.util.crop.CropUtil;
 import com.t2pellet.strawgolem.util.crop.SeedUtil;
 import com.t2pellet.tlib.Services;
@@ -20,8 +22,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.AABB;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapability<E> implements Harvester {
 
@@ -38,6 +42,11 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
     }
 
     @Override
+    public void clearQueue() {
+        harvestQueue.clear();
+    }
+
+    @Override
     public void clearHarvest() {
         currentHarvestPos = null;
     }
@@ -50,8 +59,8 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
 
     @Override
     public void completeHarvest() {
-        Services.SIDE.scheduleServer(14, this::harvestBlock);
-        synchronize();
+        if (!isHarvesting()) return;
+        Services.SIDE.scheduleServer(20, this::harvestBlock);
     }
 
     @Override
@@ -99,6 +108,33 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
         } else currentHarvestPos = null;
     }
 
+    @Override
+    public void findHarvestables() {
+        int range = StrawgolemConfig.Harvesting.harvestRange.get();
+        for (int x = 0; x < range; ++x) {
+            for (int y = 0; y < range; ++y) {
+                for (int z = 0; z < range; ++z) {
+                    BlockPos entityPos = entity.blockPosition();
+                    BlockPos[] positions = new BlockPos[]{
+                            entityPos.offset(x, y, z),
+                            entityPos.offset(x, -y, z),
+                            entityPos.offset(x, y, -z),
+                            entityPos.offset(x, -y, -z),
+                            entityPos.offset(-x, y, z),
+                            entityPos.offset(-x, -y, z),
+                            entityPos.offset(x, y, -z),
+                            entityPos.offset(-x, -y, -z),
+                    };
+                    for (BlockPos position : positions) {
+                        if (CropUtil.isGrownCrop(entity.level, position)) {
+                            queueHarvest(position);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void harvestBlock() {
         if (!entity.level.isClientSide && isHarvesting() && CropUtil.isGrownCrop(entity.level, currentHarvestPos)) {
             BlockState state = entity.level.getBlockState(currentHarvestPos);
@@ -108,10 +144,9 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
             entity.level.destroyBlock(currentHarvestPos, false, entity);
             entity.level.setBlockAndUpdate(currentHarvestPos, defaultState);
             entity.level.gameEvent(defaultState.isAir() ? GameEvent.BLOCK_DESTROY : GameEvent.BLOCK_PLACE, currentHarvestPos, GameEvent.Context.of(entity, defaultState));
-            // Sometimes the animation doesn't fire properly, and the client won't clear harvesting state in that case. This will clear it manually as a backup
-            Services.SIDE.scheduleServer(20, this::synchronize);
-            // Update state
+            // Update state and sync
             currentHarvestPos = null;
+            synchronize();
         } else clearHarvest();
     }
 

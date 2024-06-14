@@ -2,8 +2,10 @@ package com.t2pellet.strawgolem.entity.goals.golem;
 
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
+import com.t2pellet.strawgolem.entity.capabilities.harvester.Harvester;
 import com.t2pellet.strawgolem.registry.StrawgolemSounds;
 import com.t2pellet.strawgolem.util.crop.CropUtil;
+import com.t2pellet.tlib.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
@@ -25,7 +27,8 @@ public class HarvestCropGoal extends MoveToBlockGoal {
 
     @Override
     protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
-        return CropUtil.isGrownCrop((LevelAccessor) levelReader, blockPos);
+        Optional<BlockPos> harvestPos = golem.getHarvester().getHarvesting();
+        return harvestPos.isPresent() && harvestPos.get().equals(blockPos) && CropUtil.isGrownCrop((LevelAccessor) levelReader, blockPos);
     }
 
     @Override
@@ -51,13 +54,23 @@ public class HarvestCropGoal extends MoveToBlockGoal {
 
     @Override
     public void tick() {
-        BlockPos blockpos = this.getMoveToTarget();
+        BlockPos targetPos = this.getMoveToTarget();
         if (blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
+            Harvester harvester = golem.getHarvester();
             golem.getNavigation().stop();
-            golem.getHarvester().queueHarvest(blockPos);
+            if (harvester.isHarvestingBlock()) {
+                golem.setPickingUpBlock(true);
+            } else {
+                golem.setPickingUpItem(true);
+            }
+            harvester.completeHarvest();
+            Services.SIDE.scheduleServer(40, () -> {
+                golem.setPickingUpBlock(false);
+                golem.setPickingUpItem(false);
+            });
         } else {
             if (this.shouldRecalculatePath()) {
-                this.mob.getNavigation().moveTo((double)((float)blockpos.getX()) + 0.5D, (double)blockpos.getY() + 0.5D, (double)((float)blockpos.getZ()) + 0.5D, this.speedModifier);
+                this.mob.getNavigation().moveTo((double)((float)targetPos.getX()) + 0.5D, (double)targetPos.getY() + 0.5D, (double)((float)targetPos.getZ()) + 0.5D, this.speedModifier);
             }
             if (!golem.getLookControl().isLookingAtTarget()) {
                 golem.getLookControl().setLookAt(Vec3.atCenterOf(blockPos));
@@ -71,11 +84,6 @@ public class HarvestCropGoal extends MoveToBlockGoal {
         golem.playSound(StrawgolemSounds.GOLEM_INTERESTED.get());
         // Update the tether to the crop we're harvesting
         golem.getTether().update(blockPos);
-    }
-
-    @Override
-    public void stop() {
-        super.stop();
     }
 
     @Override

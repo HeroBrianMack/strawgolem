@@ -16,9 +16,11 @@ public interface Harvester extends Capability {
     void queueHarvest(BlockPos pos);
     Optional<BlockPos> startHarvest();
     void completeHarvest();
+    void clearQueue();
     void clearHarvest();
     boolean isHarvesting();
     boolean isHarvestingBlock();
     Optional<BlockPos> getHarvesting();
+    void findHarvestables();
 
 }
