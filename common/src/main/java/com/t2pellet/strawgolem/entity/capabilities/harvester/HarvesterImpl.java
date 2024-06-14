@@ -1,7 +1,7 @@
 package com.t2pellet.strawgolem.entity.capabilities.harvester;
 
 import com.t2pellet.strawgolem.StrawgolemConfig;
-import com.t2pellet.strawgolem.entity.StrawGolem;
+import com.t2pellet.strawgolem.util.VisibilityUtil;
 import com.t2pellet.strawgolem.util.crop.CropUtil;
 import com.t2pellet.strawgolem.util.crop.SeedUtil;
 import com.t2pellet.tlib.Services;
@@ -15,6 +15,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StemGrownBlock;
@@ -22,10 +23,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.AABB;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapability<E> implements Harvester {
 
@@ -53,7 +52,9 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
 
     @Override
     public Optional<BlockPos> startHarvest() {
-        currentHarvestPos = harvestQueue.poll();
+        while (!CropUtil.isGrownCrop(entity.level, currentHarvestPos) && !harvestQueue.isEmpty()) {
+            currentHarvestPos = harvestQueue.poll();
+        }
         return Optional.ofNullable(currentHarvestPos);
     }
 
@@ -82,11 +83,6 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
     public Tag writeTag() {
         CompoundTag tag = new CompoundTag();
         ListTag list = new ListTag();
-        Iterator<BlockPos> queueIterator = harvestQueue.descendingIterator();
-        while (queueIterator.hasNext()) {
-            BlockPos next = queueIterator.next();
-            list.add(NbtUtils.writeBlockPos(next));
-        }
         tag.put("list", list);
         if (currentHarvestPos != null) {
             tag.put("pos", NbtUtils.writeBlockPos(currentHarvestPos));
@@ -98,11 +94,6 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
     public void readTag(Tag tag) {
         CompoundTag compoundTag = (CompoundTag) tag;
         CompoundTag posTag = compoundTag.getCompound("pos");
-        ListTag queueTag = compoundTag.getList("list", Tag.TAG_COMPOUND);
-        for (Tag queuedTag : queueTag) {
-            BlockPos queuedPos = NbtUtils.readBlockPos((CompoundTag) queuedTag);
-            harvestQueue.add(queuedPos);
-        }
         if (!posTag.isEmpty()) {
             currentHarvestPos = NbtUtils.readBlockPos(posTag);
         } else currentHarvestPos = null;
@@ -126,7 +117,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
                             entityPos.offset(-x, -y, -z),
                     };
                     for (BlockPos position : positions) {
-                        if (CropUtil.isGrownCrop(entity.level, position)) {
+                        if (CropUtil.isGrownCrop(entity.level, position) && VisibilityUtil.canSee((LivingEntity) entity, position)) {
                             queueHarvest(position);
                         }
                     }

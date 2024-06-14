@@ -65,6 +65,7 @@ public class HarvestCropGoal extends MoveToBlockGoal {
             }
             harvester.completeHarvest();
             Services.SIDE.scheduleServer(40, () -> {
+                harvester.findHarvestables();
                 golem.setPickingUpBlock(false);
                 golem.setPickingUpItem(false);
             });
@@ -88,6 +89,6 @@ public class HarvestCropGoal extends MoveToBlockGoal {
 
     @Override
     public double acceptedDistance() {
-        return 1.4D;
+        return 1.2D;
     }
 }

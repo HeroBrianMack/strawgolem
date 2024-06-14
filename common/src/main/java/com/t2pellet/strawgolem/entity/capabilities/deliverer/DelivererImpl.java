@@ -48,7 +48,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
     private Optional<BlockPos> closestRememberedValidDeliverable() {
         return containerSet.stream()
                 .filter(p -> VisibilityUtil.canSee(entity, p) && ContainerUtil.isContainer(entity.level, p))
-                .min(Comparator.comparingDouble(p -> p.distSqr(entity.blockPosition())));
+                .min(Comparator.comparingDouble(p -> p.distManhattan(entity.blockPosition())));
     }
 
     private BlockPos scanForDeliverable(BlockPos query) {

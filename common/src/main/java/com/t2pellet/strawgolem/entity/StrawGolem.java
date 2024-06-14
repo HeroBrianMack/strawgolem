@@ -141,6 +141,8 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
         baseCommonTick();
     }
 
+
+
     private void baseClientTick() {
     }
 
@@ -153,6 +155,7 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
                 if (StrawgolemConfig.Lifespan.rainAcceleratesDecay.get()) getDecay().decay();
             }
         }
+        // When first loaded scan the area
         if (isFirstTick) {
             getHarvester().findHarvestables();
             isFirstTick = false;

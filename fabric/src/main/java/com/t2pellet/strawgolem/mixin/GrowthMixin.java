@@ -26,7 +26,6 @@ public class GrowthMixin {
                 cropPos = pos;
             }
             if (CropUtil.isGrownCrop(level, cropPos)) {
-                Constants.LOG.debug("Crop grown in world: {}, at pos: {}", level.toString(), pos.toShortString());
                 level.getServer().execute(() -> CropGrowthCallback.EVENT.invoker().grow(level, cropPos));
             }
         }

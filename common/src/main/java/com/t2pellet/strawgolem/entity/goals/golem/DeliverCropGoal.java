@@ -30,7 +30,7 @@ public class DeliverCropGoal extends MoveToBlockGoal {
 
     @Override
     public boolean canUse() {
-        return golem.getHeldItem().has() && findNearestBlock();
+        return golem.getHeldItem().has() && !golem.isPickingUpItem() && !golem.isPickingUpBlock() && findNearestBlock();
     }
 
     @Override
