@@ -58,14 +58,16 @@ public class StrawgolemConfig extends Config {
     public static class Behaviour {
         @Entry(comment = "Should golems run from raiders")
         public static final BoolProperty golemsRunFromRaiders = new BoolProperty(true);
-        @Entry(comment = "Should raiders attack golems")
-        public static final BoolProperty raidersAttackGolems = new BoolProperty(true);
         @Entry(comment = "Should golems run from monsters")
         public static final BoolProperty golemsRunFromMonsters = new BoolProperty(true);
-        @Entry(comment = "Should monsters attack golems")
-        public static final BoolProperty monstersAttackGolems = new BoolProperty(false);
         @Entry(comment = "Should golems run from sheep and cows")
         public static final BoolProperty golemsRunFromLivestock = new BoolProperty(true);
+        @Entry(comment = "Should golems avoid players")
+        public static final BoolProperty golemsRunFromPlayers = new BoolProperty(true);
+        @Entry(comment = "Should raiders attack golems")
+        public static final BoolProperty raidersAttackGolems = new BoolProperty(true);
+        @Entry(comment = "Should monsters attack golems")
+        public static final BoolProperty monstersAttackGolems = new BoolProperty(false);
         @Entry(comment = "Should sheep and cows munch on golems")
         public static final BoolProperty livestockEatGolems = new BoolProperty(true);
         @Entry(comment = "Should golems panic when damaged")
