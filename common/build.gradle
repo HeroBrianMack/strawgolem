@@ -22,8 +22,8 @@ dependencies {
      implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
      compileOnly "software.bernie.geckolib:geckolib-forge-1.19:${geckolib_version_forge}"
      compileOnly "curse.maven:animal-feeding-trough-445838:${project.feeding_trough_version}"
-     compileOnly "curse.maven:tlib-919468:${project.tlib_source_version}"
      compileOnly "curse.maven:jade-324717:${project.jade_api_id}"
+     compileOnly "curse.maven:tlib-919468:${project.tlib_common_version}"
 }
 
 publishing {
