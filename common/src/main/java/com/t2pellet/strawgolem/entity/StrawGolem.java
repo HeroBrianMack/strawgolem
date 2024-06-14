@@ -178,6 +178,7 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
             if (success) {
                 spawnHappyParticle();
                 item.shrink(1);
+                playSound(StrawgolemSounds.GOLEM_HEAL.get());
             }
             return InteractionResult.CONSUME;
         } else if (item.getItem() == StrawgolemItems.strawHat.get() && !hasHat()) {
@@ -292,8 +293,6 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
         super.readAdditionalSaveData(tag);
         // Hat!
         this.entityData.set(HAS_HAT, tag.getBoolean("hasHat"));
-        // We don't actually want harvest capability to persist
-        harvester.clear();
     }
 
     @Override

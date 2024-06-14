@@ -1,9 +1,7 @@
 package com.t2pellet.strawgolem.entity.capabilities.deliverer;
 
-import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.util.VisibilityUtil;
 import com.t2pellet.strawgolem.util.container.ContainerUtil;
-import com.t2pellet.strawgolem.util.octree.Octree;
 import com.t2pellet.tlib.entity.capability.api.AbstractCapability;
 import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
 import net.minecraft.core.BlockPos;
@@ -20,16 +18,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Comparator;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends AbstractCapability<E> implements Deliverer {
 
-    private Octree tree = new Octree(new AABB(Integer.MIN_VALUE + 1, Integer.MIN_VALUE + 1, Integer.MIN_VALUE + 1, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
+    private final Set<BlockPos> containerSet = new HashSet<>();
     private ResourceLocation level;
 
     protected DelivererImpl(E e) {
@@ -41,21 +38,17 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
     public BlockPos getDeliverPos() {
         // Clear memory if we change dimensions
         if (!entity.level.dimension().location().equals(level)) {
-            tree = new Octree(new AABB(Integer.MIN_VALUE + 1, Integer.MIN_VALUE + 1, Integer.MIN_VALUE + 1, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            containerSet.clear();
             level = entity.level.dimension().location();
         }
-        BlockPos query = entity.blockPosition();
-        int range = StrawgolemConfig.Harvesting.harvestRange.get();
-        List<BlockPos> chestsInRange = tree.search(AABB.ofSize(Vec3.atCenterOf(query), range, range, range));
-        Optional<BlockPos> pos = chestsInRange.stream().filter((p) -> VisibilityUtil.canSee(entity, p)).min(Comparator.comparingInt(p -> p.distManhattan(query)));
-        if (pos.isPresent()) {
-            BlockPos cachedPos = pos.get();
-            if (ContainerUtil.isContainer(entity.level, cachedPos)) {
-                return cachedPos;
-            } else tree.remove(cachedPos);
-        } else return scanForDeliverable(query);
+        Optional<BlockPos> cachedPos = closestRememberedValidDeliverable();
+        return cachedPos.orElseGet(() -> scanForDeliverable(entity.blockPosition()));
+    }
 
-        return null;
+    private Optional<BlockPos> closestRememberedValidDeliverable() {
+        return containerSet.stream()
+                .filter(p -> VisibilityUtil.canSee(entity, p) && ContainerUtil.isContainer(entity.level, p))
+                .min(Comparator.comparingDouble(p -> p.distSqr(entity.blockPosition())));
     }
 
     private BlockPos scanForDeliverable(BlockPos query) {
@@ -64,7 +57,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
                 for (int z = -24; z <= 24; ++z) {
                     BlockPos pos = query.offset(x, y, z);
                     if (ContainerUtil.isContainer(entity.level, pos) && VisibilityUtil.canSee(entity, pos)) {
-                        tree.insert(pos);
+                        containerSet.add(pos);
                         return pos;
                     }
                 }
@@ -108,8 +101,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
     @Override
     public Tag writeTag() {
         ListTag positionsTag = new ListTag();
-        List<BlockPos> crops = tree.getAll();
-        for (BlockPos pos : crops) {
+        for (BlockPos pos : containerSet) {
             if (ContainerUtil.isContainer(entity.level, pos)) {
                 positionsTag.add(NbtUtils.writeBlockPos(pos));
             }
@@ -123,7 +115,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         for (Tag position : positions) {
             BlockPos pos = NbtUtils.readBlockPos((CompoundTag) position);
             if (ContainerUtil.isContainer(entity.level, pos)) {
-                tree.insert(pos);
+                containerSet.add(pos);
             }
         }
     }
