@@ -10,7 +10,7 @@ import net.minecraft.world.entity.animal.Animal;
 
 public class MunchOnGolemGoal extends Goal {
 
-    private static final TargetingConditions predicate = TargetingConditions.forNonCombat().selector(e -> e instanceof StrawGolem);
+    private static final TargetingConditions predicate = TargetingConditions.forNonCombat().selector(e -> e instanceof StrawGolem strawGolem && !strawGolem.hasBarrel());
 
     private final Animal animal;
     private final double speedModifier;

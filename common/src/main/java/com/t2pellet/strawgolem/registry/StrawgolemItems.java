@@ -11,7 +11,6 @@ public class StrawgolemItems implements RegistryClass {
     private static final Item.Properties strawHatProperties = new Item.Properties()
             .stacksTo(1)
             .tab(CreativeModeTab.TAB_DECORATIONS);
-
     @IRegistryEntry
     public static final ItemEntryType strawHat = new ItemEntryType("straw_hat", strawHatProperties);
 }

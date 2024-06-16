@@ -52,6 +52,8 @@ public class StrawgolemConfig extends Config {
         public static final StringProperty repairItem = new StringProperty("minecraft:wheat", s -> {
             return ResourceLocation.isValidResourceLocation(s) && Registry.ITEM.containsKey(new ResourceLocation(s));
         });
+        @Entry(comment = "Durability for barrels equipped to a straw golem")
+        public static final IntProperty barrelDurability = new IntProperty(50, 1, 200);
     }
 
     @Section(name = "Behaviour", description = "Golem and Mob behaviour options")

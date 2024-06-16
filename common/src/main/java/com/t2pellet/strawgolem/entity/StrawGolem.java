@@ -26,6 +26,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -44,6 +45,7 @@ import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.phys.Vec3;
@@ -52,8 +54,6 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
-// TODO : Wood armor (for straw golem to protect from cow / sheep and other things)
-// TODO : Fix bug - Animation transition on world load
 // TODO : Fix bug - not always walking fully to destination
 public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilityHaver {
 
@@ -64,6 +64,7 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
     // Synched Data
     private static final EntityDataAccessor<Boolean> IS_SCARED = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HAS_HAT = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> BARREL_HEALTH = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> HARVESTING_ITEM = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HARVESTING_BLOCK = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
 
@@ -100,6 +101,7 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
         super.defineSynchedData();
         this.entityData.define(IS_SCARED, false);
         this.entityData.define(HAS_HAT, false);
+        this.entityData.define(BARREL_HEALTH, 0);
         this.entityData.define(HARVESTING_ITEM, false);
         this.entityData.define(HARVESTING_BLOCK, false);
     }
@@ -195,11 +197,15 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
                 item.shrink(1);
                 playSound(StrawgolemSounds.GOLEM_HEAL.get());
             }
-            return InteractionResult.CONSUME;
+            return InteractionResult.SUCCESS;
         } else if (item.getItem() == StrawgolemItems.strawHat.get() && !hasHat()) {
             this.entityData.set(HAS_HAT, true);
             item.shrink(1);
-            return InteractionResult.CONSUME;
+            return InteractionResult.SUCCESS;
+        } else if (item.getItem() == Items.BARREL && !hasBarrel()) {
+            entityData.set(BARREL_HEALTH, StrawgolemConfig.Lifespan.barrelDurability.get());
+            item.shrink(1);
+            return InteractionResult.SUCCESS;
         }
         return super.mobInteract(player, hand);
     }
@@ -213,9 +219,14 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
     }
 
     @Override
-    protected void actuallyHurt(DamageSource $$0, float $$1) {
-        super.actuallyHurt($$0, $$1);
-        decay.setFromHealth();
+    protected void actuallyHurt(DamageSource source, float amount) {
+        if (hasBarrel()) {
+            playSound(SoundEvents.SHIELD_BLOCK);
+            damageBarrel();
+        } else {
+            super.actuallyHurt(source, amount);
+            decay.setFromHealth();
+        }
     }
 
     /* Items */
@@ -295,6 +306,15 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
         this.entityData.set(IS_SCARED, isScared);
     }
 
+    public boolean hasBarrel() {
+     return entityData.get(BARREL_HEALTH) > 0;
+    }
+
+    public void damageBarrel() {
+        int durability = entityData.get(BARREL_HEALTH);
+        int newDurability = Math.max(durability - 1, 0);
+        entityData.set(BARREL_HEALTH, newDurability);
+    }
 
     /* Capabilities */
 
