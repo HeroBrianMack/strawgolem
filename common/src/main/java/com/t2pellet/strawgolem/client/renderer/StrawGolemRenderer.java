@@ -24,6 +24,7 @@ public class StrawGolemRenderer extends GeoEntityRenderer<StrawGolem> {
     public void render(GeoModel model, StrawGolem animatable, float partialTick, RenderType type, PoseStack poseStack, @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         // Set whether to render hat
         modelProvider.getBone("hat").setHidden(!animatable.hasHat());
+        modelProvider.getBone("barrel").setHidden(!animatable.hasBarrel());
         // Shivering animation
         if (StrawgolemConfig.Visual.golemShiversWhenDecayingFast.get() && animatable.isInWaterOrRain()) {
             if (animatable.isInWater() || !animatable.hasHat()) {

@@ -23,9 +23,6 @@ public class StrawgolemGeoModel extends AnimatedGeoModel<StrawGolem> {
     private static final ResourceLocation oldTextureResource = new ResourceLocation(Constants.MOD_ID, "textures/straw_golem_old.png");
     private static final ResourceLocation dyingTextureResource = new ResourceLocation(Constants.MOD_ID, "textures/straw_golem_dying.png");
 
-    // Magic numbers
-    private static final float ITEM_TRANSLATE_FACTOR = 0.165F;
-
 
     @Override
     public ResourceLocation getModelResource(StrawGolem golem) {
