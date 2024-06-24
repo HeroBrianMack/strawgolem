@@ -9,7 +9,7 @@ public class GolemPanicGoal extends PanicGoal {
     private final StrawGolem golem;
 
     public GolemPanicGoal(StrawGolem golem) {
-        super(golem, 0.8D);
+        super(golem, StrawgolemConfig.Behaviour.golemRunSpeed.get());
         this.golem = golem;
     }
 

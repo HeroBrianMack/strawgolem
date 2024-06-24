@@ -110,14 +110,14 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Monster.class, 8.0F, 0.5D, 0.7D, true));
-        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Evoker.class, 12.0F, 0.5D, 0.7D, true));
-        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Vindicator.class, 8.0F, 0.5D, 0.7D, true));
-        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Vex.class, 8.0F, 0.5D, 0.7D, true));
-        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Raider.class, 15.0F, 0.5D, 0.7D, true));
-        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Illusioner.class, 12.0F, 0.5D, 0.7D, true));
-        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Sheep.class, 8.0F, 0.4D, 0.6D, false));
-        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Cow.class, 8.0F, 0.4D, 0.6D, false));
+        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Monster.class, 8.0F, true));
+        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Evoker.class, 12.0F,  true));
+        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Vindicator.class, 8.0F,  true));
+        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Vex.class, 8.0F,  true));
+        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Raider.class, 15.0F,  true));
+        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Illusioner.class, 12.0F, true));
+        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Sheep.class, 8.0F,  false));
+        this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Cow.class, 8.0F,  false));
         this.goalSelector.addGoal(1, new GolemPanicGoal(this));
         this.goalSelector.addGoal(2, new GolemTemptGoal(this));
         this.goalSelector.addGoal(2, new GolemBeShyGoal(this));

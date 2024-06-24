@@ -14,8 +14,8 @@ public class GolemFleeEntityGoal<T extends LivingEntity> extends AvoidEntityGoal
     private final StrawGolem golem;
     private final boolean panic;
 
-    public GolemFleeEntityGoal(StrawGolem mob, Class<T> clazz, float distance, double walkSpeed, double sprintSpeed, boolean panic) {
-        super(mob, clazz, distance, walkSpeed, sprintSpeed);
+    public GolemFleeEntityGoal(StrawGolem mob, Class<T> clazz, float distance, boolean panic) {
+        super(mob, clazz, distance, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Behaviour.golemRunSpeed.get());
         this.golem = mob;
         this.panic = panic;
     }

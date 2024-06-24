@@ -1,5 +1,6 @@
 package com.t2pellet.strawgolem.entity.goals.golem;
 
+import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 
@@ -8,7 +9,7 @@ public class GolemWanderGoal extends WaterAvoidingRandomStrollGoal {
     private final StrawGolem golem;
 
     public GolemWanderGoal(StrawGolem golem) {
-        super(golem, 0.5F);
+        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get());
         this.golem = golem;
     }
 

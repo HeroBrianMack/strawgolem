@@ -1,5 +1,6 @@
 package com.t2pellet.strawgolem.entity.goals.golem;
 
+import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.strawgolem.entity.capabilities.decay.DecayState;
 import com.t2pellet.strawgolem.registry.StrawgolemSounds;
@@ -25,7 +26,7 @@ public class GolemRepairSelfGoal extends MoveToBlockGoal {
     private Container feeder;
 
     public GolemRepairSelfGoal(StrawGolem golem, int range) {
-        super(golem, 0.5, range);
+        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), range);
         this.golem = golem;
         this.level = (ServerLevel) golem.level;
     }

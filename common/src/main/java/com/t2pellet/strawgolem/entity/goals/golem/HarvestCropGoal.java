@@ -21,7 +21,7 @@ public class HarvestCropGoal extends MoveToBlockGoal {
     private final StrawGolem golem;
 
     public HarvestCropGoal(StrawGolem golem) {
-        super(golem, 0.5, StrawgolemConfig.Harvesting.harvestRange.get());
+        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get());
         this.golem = golem;
     }
 

@@ -6,7 +6,7 @@ import net.minecraft.world.entity.player.Player;
 public class GolemBeShyGoal extends GolemFleeEntityGoal<Player> {
 
     public GolemBeShyGoal(StrawGolem golem) {
-        super(golem, Player.class, 2.0F, 0.4D, 0.6D, false);
+        super(golem, Player.class, 2.0F, false);
     }
 
     @Override

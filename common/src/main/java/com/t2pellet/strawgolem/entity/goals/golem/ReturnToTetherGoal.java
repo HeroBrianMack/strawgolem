@@ -1,5 +1,6 @@
 package com.t2pellet.strawgolem.entity.goals.golem;
 
+import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.strawgolem.registry.StrawgolemSounds;
 import net.minecraft.core.BlockPos;
@@ -15,7 +16,7 @@ public class ReturnToTetherGoal extends MoveToBlockGoal {
     private final ServerLevel level;
 
     public ReturnToTetherGoal(StrawGolem golem) {
-        super(golem, 0.5, 24);
+        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), 24);
         this.golem = golem;
         this.level = (ServerLevel) golem.level;
     }

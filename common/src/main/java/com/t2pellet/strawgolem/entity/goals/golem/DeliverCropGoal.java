@@ -18,7 +18,7 @@ public class DeliverCropGoal extends MoveToBlockGoal {
     private final ServerLevel level;
 
     public DeliverCropGoal(StrawGolem golem) {
-        super(golem, 0.5, StrawgolemConfig.Harvesting.harvestRange.get());
+        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get());
         this.golem = golem;
         this.level = (ServerLevel) golem.level;
     }

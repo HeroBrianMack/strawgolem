@@ -1,10 +1,7 @@
 package com.t2pellet.strawgolem;
 
 import com.t2pellet.tlib.config.api.Config;
-import com.t2pellet.tlib.config.api.property.BoolProperty;
-import com.t2pellet.tlib.config.api.property.IntProperty;
-import com.t2pellet.tlib.config.api.property.ListProperty;
-import com.t2pellet.tlib.config.api.property.StringProperty;
+import com.t2pellet.tlib.config.api.property.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 
@@ -76,6 +73,10 @@ public class StrawgolemConfig extends Config {
         public static final BoolProperty golemsPanicWhenHurt = new BoolProperty(true);
         @Entry(comment = "How far the golem can wander")
         public static final IntProperty golemWanderRange = new IntProperty(24, 8, 48);
+        @Entry(comment = "Walk speed for straw golem")
+        public static final FloatProperty golemWalkSpeed = new FloatProperty(0.5F);
+        @Entry(comment = "Walk speed for straw golem")
+        public static final FloatProperty golemRunSpeed = new FloatProperty(0.8F);
     }
 
     @Section(name = "Visual", description = "Visual related settings")
