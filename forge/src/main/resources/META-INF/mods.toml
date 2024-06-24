@@ -27,9 +27,9 @@ versionRange = "[1.19,1.19.2)"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.strawgolem]]
-modId = "tlib"
+modId = "haybale"
 mandatory = true
-versionRange = "*"
+versionRange = "[0.4.2,)"
 ordering = "AFTER"
 side = "BOTH"
 [[dependencies.strawgolem]]
