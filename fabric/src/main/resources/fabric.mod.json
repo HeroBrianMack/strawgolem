@@ -35,7 +35,7 @@
         "minecraft": "1.19.2",
         "java": ">=17",
         "geckolib3": "*",
-        "haybale": ">=0.4.2"
+        "haybale": "*"
     },
     "suggests": {
         "modmenu": "*",

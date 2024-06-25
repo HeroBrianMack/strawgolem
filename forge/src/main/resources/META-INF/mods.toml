@@ -29,7 +29,7 @@ side = "BOTH"
 [[dependencies.strawgolem]]
 modId = "haybale"
 mandatory = true
-versionRange = "[0.4.2,)"
+versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"
 [[dependencies.strawgolem]]
