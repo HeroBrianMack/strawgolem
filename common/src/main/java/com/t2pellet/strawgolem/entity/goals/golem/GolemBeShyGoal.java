@@ -8,7 +8,7 @@ import net.minecraft.world.phys.Vec3;
 public class GolemBeShyGoal extends GolemFleeEntityGoal<Player> {
 
     public GolemBeShyGoal(StrawGolem golem) {
-        super(golem, Player.class, 2.0F, false);
+        super(golem, Player.class, 1.0F, false);
     }
 
     @Override

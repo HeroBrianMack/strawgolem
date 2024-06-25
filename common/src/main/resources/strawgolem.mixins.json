@@ -9,6 +9,7 @@
         "CowMixin",
         "MonsterMixin",
         "PillagerMixin",
+        "PlayerMixin",
         "SheepMixin"
     ],
     "client": [

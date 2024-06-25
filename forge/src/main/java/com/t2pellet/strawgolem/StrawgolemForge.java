@@ -1,13 +1,16 @@
 package com.t2pellet.strawgolem;
 
 import com.t2pellet.strawgolem.client.StrawgolemClient;
+import com.t2pellet.strawgolem.events.ContainerClickHandler;
 import com.t2pellet.strawgolem.events.CropGrowthEvent;
 import com.t2pellet.strawgolem.events.CropGrowthHandler;
+import com.t2pellet.strawgolem.util.container.ContainerUtil;
 import com.t2pellet.tlib.TLibForgeMod;
 import com.t2pellet.tlib.TLibMod;
 import com.t2pellet.tlib.client.TLibModClient;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.function.Consumer;
@@ -32,6 +35,11 @@ public class StrawgolemForge extends TLibForgeMod {
         MinecraftForge.EVENT_BUS.addListener((Consumer<CropGrowthEvent>) event -> {
             if (event.getLevel() instanceof ServerLevel serverLevel) {
                 CropGrowthHandler.onCropGrowth(serverLevel, event.getPos());
+            }
+        });
+        MinecraftForge.EVENT_BUS.addListener((Consumer<PlayerInteractEvent.RightClickBlock>) event -> {
+            if (ContainerUtil.isContainer(event.getLevel(), event.getPos())) {
+                ContainerClickHandler.onContainerClicked(event.getEntity(), event.getPos());
             }
         });
     }

@@ -21,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -49,6 +50,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
@@ -189,7 +191,7 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
     }
 
     @Override
-    protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+    protected @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand) {
         ItemStack item = player.getItemInHand(hand);
         if (item.getItem() == REPAIR_ITEM && decay.getState() != DecayState.NEW) {
             boolean success = decay.repair();
@@ -212,6 +214,15 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
             if (success) {
                 item.shrink(1);
                 playSound(SoundEvents.ARMOR_EQUIP_LEATHER);
+            }
+        } else if (hand == InteractionHand.MAIN_HAND && item.isEmpty() && player.isCrouching()) {
+            StrawGolemOrderer orderer = (StrawGolemOrderer) (Object) player;
+            if (orderer.getOrderedGolem().isPresent() && orderer.getOrderedGolem().get().getId() == getId()) {
+                player.displayClientMessage(Component.translatable("strawgolem.ordering.stop"), true);
+                orderer.setOrderedGolem(null);
+            } else {
+                player.displayClientMessage(Component.translatable("strawgolem.ordering.start"), true);
+                orderer.setOrderedGolem(this);
             }
         }
         return super.mobInteract(player, hand);

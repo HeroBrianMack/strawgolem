@@ -14,5 +14,8 @@
   "strawgolem.subtitle.golemDisgusted": "Strawgolem Disgusted",
   "config.jade.plugin_strawgolem.strawgolem_enabled": "Show Strawgolem Data",
   "config.jade.plugin_strawgolem.strawgolem": "Strawgolem Config",
-  "item.strawgolem.straw_hat": "Straw Hat"
+  "item.strawgolem.straw_hat": "Straw Hat",
+  "strawgolem.ordering.start": "Ordering golem",
+  "strawgolem.ordering.stop": "No longer ordering golem",
+  "strawgolem.ordering.complete": "Golem will now deliver to this container"
 }
