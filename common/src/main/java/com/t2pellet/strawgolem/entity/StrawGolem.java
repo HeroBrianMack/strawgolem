@@ -352,11 +352,14 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
         super.readAdditionalSaveData(tag);
         // Hat!
         this.entityData.set(HAS_HAT, tag.getBoolean("hasHat"));
+        // Barrel!
+        this.entityData.set(BARREL_HEALTH, tag.getInt("barrelHealth"));
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         tag.putBoolean("hasHat", this.hasHat());
+        tag.putInt("barrelHealth", this.entityData.get(BARREL_HEALTH));
         super.addAdditionalSaveData(tag);
     }
 
