@@ -227,11 +227,11 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
     }
 
     @Override
-    protected void hurtCurrentlyUsedShield(float amount) {
+    public void hurtCurrentlyUsedShield(float amount) {
         int durability = entityData.get(BARREL_HEALTH);
         int newDurability = Math.round(Math.max(durability - amount, 0));
         entityData.set(BARREL_HEALTH, newDurability);
-        playSound(newDurability > 0 ? SoundEvents.SHIELD_BLOCK : SoundEvents.SHIELD_BREAK);
+        playSound(newDurability <= 0 ? SoundEvents.SHIELD_BREAK : SoundEvents.SHIELD_BLOCK);
     }
 
     @Override
