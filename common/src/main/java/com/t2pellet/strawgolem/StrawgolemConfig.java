@@ -50,7 +50,13 @@ public class StrawgolemConfig extends Config {
             return ResourceLocation.isValidResourceLocation(s) && Registry.ITEM.containsKey(new ResourceLocation(s));
         });
         @Entry(comment = "Durability for barrels equipped to a straw golem")
-        public static final IntProperty barrelDurability = new IntProperty(50, 1, 200);
+        public static final IntProperty barrelDurability = new IntProperty(100, 1, 1000);
+        @Entry(comment = "Item to repair barrels with. Requires restart")
+        public static final StringProperty barrelItem = new StringProperty("minecraft:planks", s -> {
+            return ResourceLocation.isValidResourceLocation(s) && Registry.ITEM.containsKey(new ResourceLocation(s));
+        });
+        @Entry(comment = "How much durability to restore from barrelItem. Set to zero to disable")
+        public static final IntProperty barrelRepairAmount = new IntProperty(25, 0, 250);
     }
 
     @Section(name = "Behaviour", description = "Golem and Mob behaviour options")

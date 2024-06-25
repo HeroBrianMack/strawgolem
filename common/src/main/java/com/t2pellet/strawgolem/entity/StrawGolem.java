@@ -58,6 +58,7 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilityHaver {
 
     public static final Item REPAIR_ITEM = Registry.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
+    public static final Item BARREL_ITEM = Registry.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.barrelItem.get()));
     private static final double WALK_DISTANCE = 0.00000001D;
     private static final double RUN_DISTANCE = 0.003D;
 
@@ -206,6 +207,12 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
             entityData.set(BARREL_HEALTH, StrawgolemConfig.Lifespan.barrelDurability.get());
             item.shrink(1);
             return InteractionResult.SUCCESS;
+        } else if (item.getItem() == BARREL_ITEM && hasBarrel()) {
+            boolean success = repairBarrel();
+            if (success) {
+                item.shrink(1);
+                playSound(SoundEvents.ARMOR_EQUIP_LEATHER);
+            }
         }
         return super.mobInteract(player, hand);
     }
@@ -215,18 +222,22 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
     @Override
     public boolean isDamageSourceBlocked(DamageSource source) {
         if (source == DamageSource.SWEET_BERRY_BUSH) return true;
+        if (hasBarrel()) return true;
         return super.isDamageSourceBlocked(source);
     }
 
     @Override
+    protected void hurtCurrentlyUsedShield(float amount) {
+        int durability = entityData.get(BARREL_HEALTH);
+        int newDurability = Math.round(Math.max(durability - amount, 0));
+        entityData.set(BARREL_HEALTH, newDurability);
+        playSound(newDurability > 0 ? SoundEvents.SHIELD_BLOCK : SoundEvents.SHIELD_BREAK);
+    }
+
+    @Override
     protected void actuallyHurt(DamageSource source, float amount) {
-        if (hasBarrel()) {
-            playSound(SoundEvents.SHIELD_BLOCK);
-            damageBarrel();
-        } else {
-            super.actuallyHurt(source, amount);
-            decay.setFromHealth();
-        }
+        super.actuallyHurt(source, amount);
+        decay.setFromHealth();
     }
 
     /* Items */
@@ -310,10 +321,18 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
      return entityData.get(BARREL_HEALTH) > 0;
     }
 
-    public void damageBarrel() {
-        int durability = entityData.get(BARREL_HEALTH);
-        int newDurability = Math.max(durability - 1, 0);
-        entityData.set(BARREL_HEALTH, newDurability);
+    public boolean repairBarrel() {
+        int health = entityData.get(BARREL_HEALTH);
+        int amount = StrawgolemConfig.Lifespan.barrelRepairAmount.get();
+        if (health >= StrawgolemConfig.Lifespan.barrelDurability.get()) {
+            return false;
+        }
+        if (amount == 0) {
+            return false;
+        }
+        int newHealth = Math.min(health + amount, StrawgolemConfig.Lifespan.barrelDurability.get());
+        entityData.set(BARREL_HEALTH, newHealth);
+        return true;
     }
 
     /* Capabilities */
