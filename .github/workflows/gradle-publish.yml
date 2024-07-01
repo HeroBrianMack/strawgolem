@@ -17,7 +17,7 @@ on:
       MOD_VERSION:
         description: 'Mod Version'
         required: true
-        default: '0.4.1'
+        default: '2.2.0'
 
 env:
   MINECRAFT_VERSION: 1.19.2
@@ -138,8 +138,8 @@ jobs:
       - name: Publish Fabric
         uses: Kir-Antipov/mc-publish@v3.3.0
         with:
-          name: "haybale-${{inputs.MOD_VERSION}}-${{env.MINECRAFT_VERSION}}-${{inputs.RELEASE_TYPE}}"
-          modrinth-id: ZrllRmem
+          name: "strawgolem-${{inputs.MOD_VERSION}}-${{env.MINECRAFT_VERSION}}-${{inputs.RELEASE_TYPE}}"
+          modrinth-id: sXMCPogN
           modrinth-token: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
           changelog-file: changes/CHANGES.md
           version: "${{inputs.MOD_VERSION}}"
@@ -157,8 +157,8 @@ jobs:
       - name: Publish Forge
         uses: Kir-Antipov/mc-publish@v3.3.0
         with:
-          name: "haybale-${{inputs.MOD_VERSION}}-${{env.MINECRAFT_VERSION}}-${{inputs.RELEASE_TYPE}}"
-          modrinth-id: ZrllRmem
+          name: "strawgolem-${{inputs.MOD_VERSION}}-${{env.MINECRAFT_VERSION}}-${{inputs.RELEASE_TYPE}}"
+          modrinth-id: sXMCPogN
           modrinth-token: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
           changelog-file: changes/CHANGES.md
           version: "${{inputs.MOD_VERSION}}"
@@ -186,8 +186,8 @@ jobs:
       - name: Publish Fabric
         uses: Kir-Antipov/mc-publish@v3.3.0
         with:
-          name: "haybale-${{inputs.MOD_VERSION}}-${{env.MINECRAFT_VERSION}}-${{inputs.RELEASE_TYPE}}"
-          curseforge-id: 919468
+          name: "strawgolem-${{inputs.MOD_VERSION}}-${{env.MINECRAFT_VERSION}}-${{inputs.RELEASE_TYPE}}"
+          curseforge-id: 449768
           curseforge-token: ${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}
           changelog-file: changes/CHANGES.md
           version: "${{inputs.MOD_VERSION}}"
@@ -205,8 +205,8 @@ jobs:
       - name: Publish Forge
         uses: Kir-Antipov/mc-publish@v3.3.0
         with:
-          name: "haybale-${{inputs.MOD_VERSION}}-${{env.MINECRAFT_VERSION}}-${{inputs.RELEASE_TYPE}}"
-          curseforge-id: 919468
+          name: "strawgolem-${{inputs.MOD_VERSION}}-${{env.MINECRAFT_VERSION}}-${{inputs.RELEASE_TYPE}}"
+          curseforge-id: 387580
           curseforge-token: ${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}
           changelog-file: changes/CHANGES.md
           version: "${{inputs.MOD_VERSION}}"
