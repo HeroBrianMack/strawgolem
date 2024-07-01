@@ -332,6 +332,10 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
      return entityData.get(BARREL_HEALTH) > 0;
     }
 
+    public int getBarrelHealth() {
+        return entityData.get(BARREL_HEALTH);
+    }
+
     public boolean repairBarrel() {
         int health = entityData.get(BARREL_HEALTH);
         int amount = StrawgolemConfig.Lifespan.barrelRepairAmount.get();

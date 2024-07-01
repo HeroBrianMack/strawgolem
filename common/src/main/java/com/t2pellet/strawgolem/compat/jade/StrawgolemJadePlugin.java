@@ -11,20 +11,29 @@ import snownee.jade.api.config.IPluginConfig;
 public class StrawgolemJadePlugin implements IWailaPlugin, IEntityComponentProvider {
 
     private static final ResourceLocation UUID = new ResourceLocation(Constants.MOD_ID, "strawgolem");
-    private static final ResourceLocation ENABLED = new ResourceLocation(Constants.MOD_ID, "strawgolem_enabled");
+    private static final ResourceLocation DECAY = new ResourceLocation(Constants.MOD_ID, "strawgolem_decay");
+    private static final ResourceLocation BARREL = new ResourceLocation(Constants.MOD_ID, "strawgolem_barrel");
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerEntityComponent(this, StrawGolem.class);
-        registration.addConfig(ENABLED, true);
+        registration.addConfig(DECAY, true);
+        registration.addConfig(BARREL, true);
     }
 
     @Override
     public void appendTooltip(ITooltip iTooltip, EntityAccessor entityAccessor, IPluginConfig iPluginConfig) {
-        if (iPluginConfig.get(ENABLED)) {
+        if (iPluginConfig.get(DECAY)) {
             StrawGolem golem = (StrawGolem) entityAccessor.getEntity();
             String decay = golem.getDecay().getState().getDescription();
             iTooltip.add(Component.translatable(decay));
+        }
+        if (iPluginConfig.get(BARREL)) {
+            StrawGolem golem = (StrawGolem) entityAccessor.getEntity();
+            if (golem.hasBarrel()) {
+                Component component = Component.translatable("strawgolem.barrel.health", golem.getBarrelHealth());
+                iTooltip.add(component);
+            }
         }
     }
 
