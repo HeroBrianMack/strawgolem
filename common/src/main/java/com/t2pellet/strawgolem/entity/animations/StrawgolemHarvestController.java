@@ -20,7 +20,7 @@ public class StrawgolemHarvestController extends StrawgolemAnimationController {
             }
         } else if (event.getAnimatable().isPickingUpItem()) {
             if (StrawgolemConfig.Visual.showHarvestItemAnimation.get()) {
-                event.getController().setAnimation(HARVEST_ITEM_ANIM);
+                event.getController().setAnimation(event.getAnimatable().hasBarrel() ? HARVEST_BLOCK_ANIM : HARVEST_ITEM_ANIM);
                 return PlayState.CONTINUE;
             }
         }

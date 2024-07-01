@@ -418,6 +418,11 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
 
     /* Helpers */
 
+    public boolean shouldHoldAboveHead() {
+        if (hasBarrel() && !getMainHandItem().isEmpty()) return true;
+        return isHoldingBlock();
+    }
+
     public boolean isHoldingBlock() {
         Item item = heldItem.get().getItem();
         return item instanceof BlockItem blockItem && blockItem.getBlock() instanceof StemGrownBlock;

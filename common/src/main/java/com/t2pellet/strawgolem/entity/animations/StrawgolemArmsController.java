@@ -22,7 +22,7 @@ public class StrawgolemArmsController extends StrawgolemAnimationController {
 
         AnimationController<StrawGolem> controller = event.getController();
         if (golem.isScared()) controller.setAnimation(SCARED_ANIM);
-        else if (golem.isHoldingBlock()) controller.setAnimation(HOLDING_BLOCK_ANIM);
+        else if (golem.shouldHoldAboveHead()) controller.setAnimation(HOLDING_BLOCK_ANIM);
         else if (golem.getHeldItem().has()) controller.setAnimation(HOLDING_ITEM_ANIM);
         else if (golem.isRunning()) controller.setAnimation(RUN_ARMS_ANIM);
         else if (golem.isMoving()) controller.setAnimation(WALK_ARMS_ANIM);
