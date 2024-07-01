@@ -12,17 +12,14 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.gameevent.GameEvent;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends AbstractCapability<E> implements Deliverer {
 
@@ -56,7 +53,6 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
             }
             priorityContainer = pos;
         }
-
     }
 
     private void clearData() {
@@ -66,12 +62,17 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
     }
 
     private Optional<BlockPos> closestRememberedValidDeliverable() {
-        if (priorityContainer != null && VisibilityUtil.canSee(entity, priorityContainer) && ContainerUtil.isContainer(entity.level, priorityContainer)) {
+        if (priorityContainer != null && canDeliverToPos(entity.level, priorityContainer)) {
             return Optional.of(priorityContainer);
         }
         return containerSet.stream()
-                .filter(p -> VisibilityUtil.canSee(entity, p) && ContainerUtil.isContainer(entity.level, p))
+                .filter(p -> canDeliverToPos(entity.level, p))
                 .min(Comparator.comparingDouble(p -> p.distManhattan(entity.blockPosition())));
+    }
+
+    private boolean canDeliverToPos(LevelAccessor level, BlockPos pos) {
+        ItemStack deliveringStack = entity.getMainHandItem();
+        return VisibilityUtil.canSee(entity, pos) && ContainerUtil.isContainer(level, pos) && !ContainerUtil.findSlotsInContainer(level, pos, deliveringStack).isEmpty();
     }
 
     private BlockPos scanForDeliverable(BlockPos query) {
@@ -91,33 +92,23 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
 
     @Override
     public void deliver(BlockPos pos) {
-        ItemStack stack = entity.getItemInHand(InteractionHand.MAIN_HAND).copy();
+        ItemStack stack = entity.getMainHandItem().copy();
         // Need an item to deliver
         if (!stack.isEmpty()) {
             // Deliver what we can to the container if it exists
             if (ContainerUtil.isContainer(entity.level, pos)) {
-                Container container = (Container) entity.level.getBlockEntity(pos);
-                for (int i = 0; i < container.getContainerSize(); ++i) {
-                    ItemStack containerStack = container.getItem(i);
-                    if (containerStack.isEmpty()) {
-                        container.setItem(i, stack);
-                        stack = ItemStack.EMPTY;
-                    } else if (containerStack.is(stack.getItem())) {
-                        int placeableCount = containerStack.getMaxStackSize() - containerStack.getCount();
-                        int placingCount = Math.min(stack.getCount(), placeableCount);
-                        containerStack.grow(placingCount);
-                        stack.shrink(placingCount);
-                    }
-                    if (stack.isEmpty()) break;
+                List<Integer> slots = ContainerUtil.findSlotsInContainer(entity.level, pos, stack);
+                if (!slots.isEmpty()) {
+                    ContainerUtil.addToContainer(entity.level, pos, stack, slots);
                 }
+                // Drop remaining items
+                entity.level.addFreshEntity(new ItemEntity(entity.level, pos.getX(), pos.getY() + 1, pos.getZ(), stack));
+                entity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                 // Interactions
                 entity.level.gameEvent(entity, GameEvent.CONTAINER_OPEN, pos);
                 entity.level.playSound(null, pos, SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 1.0F, 1.0F);
                 entity.level.gameEvent(entity, GameEvent.CONTAINER_CLOSE, pos);
             }
-            // Drop remaining stack as ItemEntity
-            entity.level.addFreshEntity(new ItemEntity(entity.level, pos.getX(), pos.getY() + 1, pos.getZ(), stack));
-            entity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         }
     }
 

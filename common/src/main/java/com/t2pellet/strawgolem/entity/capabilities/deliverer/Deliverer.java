@@ -14,7 +14,6 @@ public interface Deliverer extends Capability {
 
     BlockPos getDeliverPos();
     void setPriorityPos(BlockPos pos);
-
     void deliver(BlockPos pos);
 
 }
