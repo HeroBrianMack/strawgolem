@@ -30,7 +30,7 @@ public class PlayerMixin implements StrawGolemOrderer {
         Player player = (Player) (Object) this;
         int golemID = player.getEntityData().get(GOLEM_ID);
         if (golemID > 0) {
-            StrawGolem golem = (StrawGolem) player.level.getEntity(golemID);
+            StrawGolem golem = (StrawGolem) player.level().getEntity(golemID);
             return Optional.ofNullable(golem);
         }
         return Optional.empty();

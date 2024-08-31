@@ -20,7 +20,7 @@ public class DeliverCropGoal extends MoveToBlockGoal {
     public DeliverCropGoal(StrawGolem golem) {
         super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get());
         this.golem = golem;
-        this.level = (ServerLevel) golem.level;
+        this.level = (ServerLevel) golem.level();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class DeliverCropGoal extends MoveToBlockGoal {
     @Override
     protected boolean findNearestBlock() {
         BlockPos blockPos = golem.getDeliverer().getDeliverPos();
-        if (isValidTarget(mob.getLevel(), blockPos)) {
+        if (isValidTarget(mob.level(), blockPos)) {
             this.blockPos = blockPos;
             return true;
         }

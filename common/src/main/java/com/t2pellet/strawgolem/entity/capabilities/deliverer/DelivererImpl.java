@@ -29,13 +29,13 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
 
     protected DelivererImpl(E e) {
         super(e);
-        level = entity.level.dimension().location();
+        level = entity.level().dimension().location();
     }
 
     @Override
     public BlockPos getDeliverPos() {
         // Clear memory if we change dimensions
-        if (!entity.level.dimension().location().equals(level)) {
+        if (!entity.level().dimension().location().equals(level)) {
             clearData();
         }
         Optional<BlockPos> cachedPos = closestRememberedValidDeliverable();
@@ -44,10 +44,10 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
 
     @Override
     public void setPriorityPos(BlockPos pos) {
-        if (!entity.level.dimension().location().equals(level)) {
+        if (!entity.level().dimension().location().equals(level)) {
             clearData();
         }
-        if (ContainerUtil.isContainer(entity.level, pos)) {
+        if (ContainerUtil.isContainer(entity.level(), pos)) {
             if (!containerSet.contains(pos)) {
                 containerSet.add(pos);
             }
@@ -58,15 +58,15 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
     private void clearData() {
         containerSet.clear();
         priorityContainer = null;
-        level = entity.level.dimension().location();
+        level = entity.level().dimension().location();
     }
 
     private Optional<BlockPos> closestRememberedValidDeliverable() {
-        if (priorityContainer != null && canDeliverToPos(entity.level, priorityContainer)) {
+        if (priorityContainer != null && canDeliverToPos(entity.level(), priorityContainer)) {
             return Optional.of(priorityContainer);
         }
         return containerSet.stream()
-                .filter(p -> canDeliverToPos(entity.level, p))
+                .filter(p -> canDeliverToPos(entity.level(), p))
                 .min(Comparator.comparingDouble(p -> p.distManhattan(entity.blockPosition())));
     }
 
@@ -80,7 +80,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
             for (int y = -12; y <= 12; ++y) {
                 for (int z = -24; z <= 24; ++z) {
                     BlockPos pos = query.offset(x, y, z);
-                    if (ContainerUtil.isContainer(entity.level, pos) && VisibilityUtil.canSee(entity, pos)) {
+                    if (ContainerUtil.isContainer(entity.level(), pos) && VisibilityUtil.canSee(entity, pos)) {
                         containerSet.add(pos);
                         return pos;
                     }
@@ -96,18 +96,18 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         // Need an item to deliver
         if (!stack.isEmpty()) {
             // Deliver what we can to the container if it exists
-            if (ContainerUtil.isContainer(entity.level, pos)) {
-                List<Integer> slots = ContainerUtil.findSlotsInContainer(entity.level, pos, stack);
+            if (ContainerUtil.isContainer(entity.level(), pos)) {
+                List<Integer> slots = ContainerUtil.findSlotsInContainer(entity.level(), pos, stack);
                 if (!slots.isEmpty()) {
-                    ContainerUtil.addToContainer(entity.level, pos, stack, slots);
+                    ContainerUtil.addToContainer(entity.level(), pos, stack, slots);
                 }
                 // Drop remaining items
-                entity.level.addFreshEntity(new ItemEntity(entity.level, pos.getX(), pos.getY() + 1, pos.getZ(), stack));
+                entity.level().addFreshEntity(new ItemEntity(entity.level(), pos.getX(), pos.getY() + 1, pos.getZ(), stack));
                 entity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                 // Interactions
-                entity.level.gameEvent(entity, GameEvent.CONTAINER_OPEN, pos);
-                entity.level.playSound(null, pos, SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 1.0F, 1.0F);
-                entity.level.gameEvent(entity, GameEvent.CONTAINER_CLOSE, pos);
+                entity.level().gameEvent(entity, GameEvent.CONTAINER_OPEN, pos);
+                entity.level().playSound(null, pos, SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                entity.level().gameEvent(entity, GameEvent.CONTAINER_CLOSE, pos);
             }
         }
     }
@@ -120,7 +120,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         }
         ListTag positionsTag = new ListTag();
         for (BlockPos pos : containerSet) {
-            if (ContainerUtil.isContainer(entity.level, pos)) {
+            if (ContainerUtil.isContainer(entity.level(), pos)) {
                 positionsTag.add(NbtUtils.writeBlockPos(pos));
             }
         }
@@ -147,7 +147,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         containerSet.clear();
         for (Tag position : positions) {
             BlockPos pos = NbtUtils.readBlockPos((CompoundTag) position);
-            if (ContainerUtil.isContainer(entity.level, pos)) {
+            if (ContainerUtil.isContainer(entity.level(), pos)) {
                 containerSet.add(pos);
             }
         }

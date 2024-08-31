@@ -1,5 +1,5 @@
 modLoader = "javafml" #mandatory
-loaderVersion = "[43,)" #mandatory This is typically bumped every Minecraft version by Forge. See https://files.minecraftforge.net/ for a list of versions.
+loaderVersion = "[47,)" #mandatory This is typically bumped every Minecraft version by Forge. See https://files.minecraftforge.net/ for a list of versions.
 license = "AGPLv3" # Review your options at https://choosealicense.com/.
 #issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
 [[mods]] #mandatory
@@ -17,23 +17,23 @@ Adds a helpful lil' straw golem. He's a farmer!
 [[dependencies.strawgolem]] #optional
 modId = "forge" #mandatory
 mandatory = true #mandatory
-versionRange = "[43,)" #mandatory
+versionRange = "[47,)" #mandatory
 ordering = "NONE" # The order that this dependency should load in relation to your mod, required to be either 'BEFORE' or 'AFTER' if the dependency is not mandatory
 side = "BOTH" # Side this dependency is applied on - 'BOTH', 'CLIENT' or 'SERVER'
 [[dependencies.strawgolem]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19,1.19.2)"
+versionRange = "[1.20.1]"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.strawgolem]]
 modId = "haybale"
-mandatory = true
+mandatory = false
 versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"
 [[dependencies.strawgolem]]
-modId = "geckolib3"
+modId = "geckolib"
 mandatory = true
 versionRange = "*"
 ordering = "BEFORE"

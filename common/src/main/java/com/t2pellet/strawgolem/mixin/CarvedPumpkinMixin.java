@@ -41,12 +41,14 @@ public class CarvedPumpkinMixin {
 
     @Inject(method = "canSpawnGolem", at = @At("RETURN"), cancellable = true)
     public void canSpawnGolem(LevelReader levelReader, BlockPos pos, CallbackInfoReturnable<Boolean> ci) {
+        System.out.println("can");
         boolean canSpawn = ci.getReturnValue() || getOrCreateStrawGolemBase().find(levelReader, pos) != null;
         ci.setReturnValue(canSpawn);
     }
 
     @Inject(method = "trySpawnGolem", at = @At("TAIL"))
     private void trySpawnGolem(Level level, BlockPos pos, CallbackInfo ci) {
+        System.out.println("try");
         BlockPattern.BlockPatternMatch patternMatch = this.getOrCreateStrawGolemFull().find(level, pos);
         if (patternMatch != null) {
             // Clear it

@@ -1,19 +1,19 @@
 package com.t2pellet.strawgolem.entity.animations;
 
 import com.t2pellet.strawgolem.entity.StrawGolem;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
 
 public class StrawgolemMovementController extends StrawgolemAnimationController {
 
-    public static final AnimationBuilder LEGS_RUN_ANIM = new AnimationBuilder().addAnimation("legs_run");
-    public static final AnimationBuilder LEGS_WALK_ANIM = new AnimationBuilder().addAnimation("legs_walk");
-    public static final AnimationBuilder LEGS_IDLE_ANIM = new AnimationBuilder().addAnimation("legs_idle");
+    public static final RawAnimation LEGS_RUN_ANIM =  RawAnimation.begin().thenPlay("legs_run");
+    public static final RawAnimation LEGS_WALK_ANIM = RawAnimation.begin().thenPlay("legs_walk");
+    public static final RawAnimation LEGS_IDLE_ANIM = RawAnimation.begin().thenPlay("legs_idle");
 
-    private static final IAnimationPredicate<StrawGolem> PREDICATE = event -> {
+    private static final AnimationStateHandler<StrawGolem> PREDICATE = event -> {
         StrawGolem golem = event.getAnimatable();
-        if (golem.isPickingUpBlock() || golem.isPickingUpItem()) return PlayState.STOP;
+        if (golem.isPickingUpBlock() || golem.isPickingUpItem()) return PlayState.STOP.STOP;
 
         AnimationController<StrawGolem> controller = event.getController();
         if (golem.isRunning()) controller.setAnimation(LEGS_RUN_ANIM);

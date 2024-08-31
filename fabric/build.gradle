@@ -3,7 +3,13 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'fabric-loom'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
+
+configurations {
+    shade
+}
+
 base {
     archivesName = "${mod_name}-fabric-${minecraft_version}"
 }
@@ -14,7 +20,8 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
     implementation project(":common")
-    modImplementation "software.bernie.geckolib:geckolib-fabric-1.19:${geckolib_version_fabric}"
+    modImplementation "software.bernie.geckolib:geckolib-fabric-1.20.1:${geckolib_version_fabric}"
+    implementation("com.eliotlash.mclib:mclib:20")
     modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
     modImplementation "curse.maven:farmers-delight-fabric-482834:${project.farmers_delight_version}"
     modImplementation "curse.maven:animal-feeding-trough-445838:${project.feeding_trough_version}"
@@ -22,7 +29,7 @@ dependencies {
     modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modImplementation "curse.maven:haybale-919468:${project.tlib_fabric_version}"
+    modImplementation "curse.maven:haybale-1-20-1-1092172:${project.tlib_fabric_version}"
 }
 
 loom {
@@ -56,6 +63,16 @@ tasks.withType(Javadoc).configureEach {
 }
 tasks.named("sourcesJar", Jar) {
     from(project(":common").sourceSets.main.allSource)
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+    archiveClassifier.set("dev")
+}
+
+remapJar {
+    dependsOn(shadowJar)
+    inputFile = tasks.shadowJar.archiveFile
 }
 
 processResources {

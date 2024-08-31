@@ -4,6 +4,8 @@ import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
@@ -34,7 +36,7 @@ public class MunchOnGolemGoal extends Goal {
         } else {
             // Occurs every 1-3 minutes
             this.nextStartTick = reducedTickDelay(600 + this.animal.getRandom().nextInt(3200));
-            this.target = this.animal.level.getNearestEntity(StrawGolem.class, predicate, animal, animal.getX(), animal.getY(), animal.getZ(), animal.getBoundingBox().inflate(24.0D));
+            this.target = this.animal.level().getNearestEntity(StrawGolem.class, predicate, animal, animal.getX(), animal.getY(), animal.getZ(), animal.getBoundingBox().inflate(24.0D));
             return this.target != null;
         }
     }
@@ -48,7 +50,7 @@ public class MunchOnGolemGoal extends Goal {
     public void stop() {
         if (this.target.isAlive() && this.animal.distanceToSqr(this.target) <= 1.0F) {
             this.animal.playSound(SoundEvents.HORSE_EAT, 1.0F, 1.0F);
-            this.target.hurt(DamageSource.mobAttack(animal), 0.5F);
+            this.target.hurt(target.level().damageSources().mobAttack(animal), 0.5F);
         }
         this.target = null;
     }

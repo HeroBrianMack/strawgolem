@@ -5,12 +5,7 @@
     "refmap": "${mod_id}.refmap.json",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
-        "CarvedPumpkinMixin",
-        "CowMixin",
-        "MonsterMixin",
-        "PillagerMixin",
-        "PlayerMixin",
-        "SheepMixin"
+
     ],
     "client": [
     ],

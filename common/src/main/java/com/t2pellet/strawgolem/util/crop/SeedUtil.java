@@ -2,6 +2,7 @@ package com.t2pellet.strawgolem.util.crop;
 
 import com.t2pellet.strawgolem.compat.api.Seed;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -11,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class SeedUtil {
 
-    public static final TagKey<Item> SEEDS = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation("strawgolem", "seeds"));
+    public static final TagKey<Item> SEEDS = TagKey.create(BuiltInRegistries.ITEM.key(), new ResourceLocation("strawgolem", "seeds"));
 
     private SeedUtil() {}
 

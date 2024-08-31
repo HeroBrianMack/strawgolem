@@ -38,8 +38,8 @@ class HeldItemImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabili
     public void drop() {
         ItemStack heldItem = get();
         set(ItemStack.EMPTY);
-        ItemEntity itemEntity = new ItemEntity(entity.level, entity.getX(), entity.getY() + 1, entity.getZ(), heldItem);
-        entity.level.addFreshEntity(itemEntity);
+        ItemEntity itemEntity = new ItemEntity(entity.level(), entity.getX(), entity.getY() + 1, entity.getZ(), heldItem);
+        entity.level().addFreshEntity(itemEntity);
     }
 
     @Override

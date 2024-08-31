@@ -20,10 +20,12 @@ javadoc.enabled(false)
 dependencies {
      compileOnly group:'org.spongepowered', name:'mixin', version:'0.8.5'
      implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
-     compileOnly "software.bernie.geckolib:geckolib-forge-1.19:${geckolib_version_forge}"
+     compileOnly "software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version_forge}"
+     compileOnly("com.eliotlash.mclib:mclib:20")
      compileOnly "curse.maven:animal-feeding-trough-445838:${project.feeding_trough_version}"
      compileOnly "curse.maven:jade-324717:${project.jade_api_id}"
-     compileOnly "curse.maven:haybale-919468:${project.tlib_common_version}"
+     implementation("me.shedaniel.cloth:cloth-config-forge:${project.cloth_version}")
+     compileOnly "curse.maven:haybale-1-20-1-1092172:${project.tlib_common_version}"
 }
 
 publishing {

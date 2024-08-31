@@ -1,20 +1,20 @@
 package com.t2pellet.strawgolem.entity.animations;
 
 import com.t2pellet.strawgolem.entity.StrawGolem;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
 
 public class StrawgolemArmsController extends StrawgolemAnimationController {
 
-    public static final AnimationBuilder SCARED_ANIM = new AnimationBuilder().addAnimation("arms_scared");
-    public static final AnimationBuilder HOLDING_BLOCK_ANIM = new AnimationBuilder().addAnimation("arms_hold_block");
-    public static final AnimationBuilder HOLDING_ITEM_ANIM = new AnimationBuilder().addAnimation("arms_hold_item");
-    public static final AnimationBuilder RUN_ARMS_ANIM = new AnimationBuilder().addAnimation("arms_run");
-    public static final AnimationBuilder WALK_ARMS_ANIM = new AnimationBuilder().addAnimation("arms_walk");
-    public static final AnimationBuilder IDLE_ANIM = new AnimationBuilder().addAnimation("arms_idle");
+    public static final RawAnimation SCARED_ANIM = RawAnimation.begin().thenPlay("arms_scared");
+    public static final RawAnimation HOLDING_BLOCK_ANIM = RawAnimation.begin().thenPlay("arms_hold_block");
+    public static final RawAnimation HOLDING_ITEM_ANIM = RawAnimation.begin().thenPlay("arms_hold_item");
+    public static final RawAnimation RUN_ARMS_ANIM = RawAnimation.begin().thenPlay("arms_run");
+    public static final RawAnimation WALK_ARMS_ANIM = RawAnimation.begin().thenPlay("arms_walk");
+    public static final RawAnimation IDLE_ANIM =  RawAnimation.begin().thenPlay("arms_idle");
 
-    private static final IAnimationPredicate<StrawGolem> PREDICATE = event -> {
+    private static final AnimationStateHandler<StrawGolem> PREDICATE = event -> {
         StrawGolem golem = event.getAnimatable();
         if (golem.isPickingUpItem() || golem.isPickingUpBlock()) {
             return PlayState.STOP;

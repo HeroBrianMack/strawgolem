@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 import java.util.*;
@@ -52,7 +53,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
 
     @Override
     public Optional<BlockPos> startHarvest() {
-        while (!CropUtil.isGrownCrop(entity.level, currentHarvestPos) && !harvestQueue.isEmpty()) {
+        while (!CropUtil.isGrownCrop(entity.level(), currentHarvestPos) && !harvestQueue.isEmpty()) {
             currentHarvestPos = harvestQueue.poll();
         }
         return Optional.ofNullable(currentHarvestPos);
@@ -71,7 +72,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
 
     @Override
     public boolean isHarvestingBlock() {
-        return isHarvesting() && entity.level.getBlockState(currentHarvestPos).getBlock() instanceof StemGrownBlock;
+        return isHarvesting() && entity.level().getBlockState(currentHarvestPos).getBlock() instanceof StemGrownBlock;
     }
 
     @Override
@@ -117,7 +118,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
                             entityPos.offset(-x, -y, -z),
                     };
                     for (BlockPos position : positions) {
-                        if (CropUtil.isGrownCrop(entity.level, position) && VisibilityUtil.canSee((LivingEntity) entity, position)) {
+                        if (CropUtil.isGrownCrop(entity.level(), position) && VisibilityUtil.canSee((LivingEntity) entity, position)) {
                             queueHarvest(position);
                         }
                     }
@@ -127,14 +128,14 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
     }
 
     private void harvestBlock() {
-        if (!entity.level.isClientSide && isHarvesting() && CropUtil.isGrownCrop(entity.level, currentHarvestPos)) {
-            BlockState state = entity.level.getBlockState(currentHarvestPos);
+        if (!entity.level().isClientSide && isHarvesting() && CropUtil.isGrownCrop(entity.level(), currentHarvestPos)) {
+            BlockState state = entity.level().getBlockState(currentHarvestPos);
             BlockState defaultState = state.getBlock() instanceof StemGrownBlock ? Blocks.AIR.defaultBlockState() : state.getBlock().defaultBlockState();
             entity.setItemSlot(EquipmentSlot.MAINHAND, pickupLoot(state));
             // Break block
-            entity.level.destroyBlock(currentHarvestPos, false, entity);
-            entity.level.setBlockAndUpdate(currentHarvestPos, defaultState);
-            entity.level.gameEvent(defaultState.isAir() ? GameEvent.BLOCK_DESTROY : GameEvent.BLOCK_PLACE, currentHarvestPos, GameEvent.Context.of(entity, defaultState));
+            entity.level().destroyBlock(currentHarvestPos, false, entity);
+            entity.level().setBlockAndUpdate(currentHarvestPos, defaultState);
+            entity.level().gameEvent(defaultState.isAir() ? GameEvent.BLOCK_DESTROY : GameEvent.BLOCK_PLACE, currentHarvestPos, GameEvent.Context.of(entity, defaultState));
             // Update state and sync
             currentHarvestPos = null;
             synchronize();
@@ -143,7 +144,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
 
     private ItemStack pickupLoot(BlockState state) {
         if (state.getBlock() instanceof StemGrownBlock) return new ItemStack(state.getBlock().asItem(), 1);
-        LootContext.Builder builder = new LootContext.Builder((ServerLevel) entity.level).withParameter(LootContextParams.TOOL, ItemStack.EMPTY).withParameter(LootContextParams.ORIGIN, entity.position());
+        LootParams.Builder builder = new LootParams.Builder((ServerLevel) entity.level()).withParameter(LootContextParams.TOOL, ItemStack.EMPTY).withParameter(LootContextParams.ORIGIN, entity.position());
         List<ItemStack> drops = state.getDrops(builder);
         Optional<ItemStack> pickupStack = drops.stream().filter((d) -> !SeedUtil.isSeed(d) || d.getItem().isEdible()).findFirst();
         return pickupStack.orElse(ItemStack.EMPTY);

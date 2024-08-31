@@ -13,7 +13,7 @@ public class GolemBeShyGoal extends GolemFleeEntityGoal<Player> {
 
     @Override
     public boolean canUse() {
-        this.toAvoid = this.mob.level.getNearestPlayer(this.mob, this.maxDist);
+        this.toAvoid = this.mob.level().getNearestPlayer(this.mob, this.maxDist);
         if (this.toAvoid == null) {
             return false;
         } else if (isTempting()) {

@@ -44,7 +44,7 @@ public class HarvestCropGoal extends MoveToBlockGoal {
 
     @Override
     public boolean canContinueToUse() {
-        return !golem.getHeldItem().has() && this.isValidTarget(this.mob.level, this.blockPos);
+        return !golem.getHeldItem().has() && this.isValidTarget(this.mob.level(), this.blockPos);
     }
 
     @Override

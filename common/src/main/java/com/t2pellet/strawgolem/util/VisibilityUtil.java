@@ -12,7 +12,7 @@ public class VisibilityUtil {
     private VisibilityUtil() {}
 
     public static boolean canSee(LivingEntity e, BlockPos query) {
-        Level level = e.level;
+        Level level = e.level();
         Vec3 entityPos = e.getEyePosition();
         Vec3 queryPos = Vec3.atCenterOf(query);
         ClipContext ctx = new ClipContext(entityPos, queryPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, e);

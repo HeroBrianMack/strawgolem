@@ -6,6 +6,7 @@ import com.t2pellet.strawgolem.entity.capabilities.decay.DecayState;
 import com.t2pellet.strawgolem.registry.StrawgolemSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
@@ -28,14 +29,14 @@ public class GolemRepairSelfGoal extends MoveToBlockGoal {
     public GolemRepairSelfGoal(StrawGolem golem, int range) {
         super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), range);
         this.golem = golem;
-        this.level = (ServerLevel) golem.level;
+        this.level = (ServerLevel) golem.level();
     }
 
     @Override
     protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
         BlockEntity blockEntity = levelReader.getBlockEntity(blockPos);
         Block block = levelReader.getBlockState(blockPos).getBlock();
-        if (Registry.BLOCK.getKey(block).equals(FEEDING_TROUGH_RESOURCE) && blockEntity instanceof Container container) {
+        if (BuiltInRegistries.BLOCK.getKey(block).equals(FEEDING_TROUGH_RESOURCE) && blockEntity instanceof Container container) {
             ItemStack stack = container.getItem(0);
             if (stack.getCount() >= 4 && stack.is(StrawGolem.REPAIR_ITEM)) {
                 this.feeder = container;

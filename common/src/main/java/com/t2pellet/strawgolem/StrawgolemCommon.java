@@ -5,6 +5,7 @@ import com.t2pellet.strawgolem.registry.StrawgolemEntities;
 import com.t2pellet.strawgolem.registry.StrawgolemItems;
 import com.t2pellet.strawgolem.registry.StrawgolemParticles;
 import com.t2pellet.strawgolem.registry.StrawgolemSounds;
+
 import com.t2pellet.tlib.TLibMod;
 import com.t2pellet.tlib.config.api.Config;
 import com.t2pellet.tlib.entity.capability.api.registry.IModCapabilities;

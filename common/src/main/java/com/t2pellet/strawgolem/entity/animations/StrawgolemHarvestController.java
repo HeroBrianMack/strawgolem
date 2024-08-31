@@ -2,16 +2,16 @@ package com.t2pellet.strawgolem.entity.animations;
 
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
 
 public class StrawgolemHarvestController extends StrawgolemAnimationController {
 
-    public static final AnimationBuilder HARVEST_BLOCK_ANIM = new AnimationBuilder().addAnimation("harvest_block");
-    public static final AnimationBuilder HARVEST_ITEM_ANIM = new AnimationBuilder().addAnimation("harvest_item");
+    public static final RawAnimation HARVEST_BLOCK_ANIM = RawAnimation.begin().thenPlay("harvest_block");
+    public static final RawAnimation HARVEST_ITEM_ANIM = RawAnimation.begin().thenPlay("harvest_item");
 
-    private static PlayState predicate(AnimationEvent<StrawGolem> event) {
+    private static PlayState predicate(AnimationState<StrawGolem> event) {
         // Appropriate animation for regular crop or gourd crop
         if (event.getAnimatable().isPickingUpBlock()) {
             if (StrawgolemConfig.Visual.showHarvestBlockAnimation.get()) {
@@ -24,14 +24,14 @@ public class StrawgolemHarvestController extends StrawgolemAnimationController {
                 return PlayState.CONTINUE;
             }
         }
-        event.getController().markNeedsReload();
+        event.getController().forceAnimationReset();
         return PlayState.STOP;
     }
 
     public StrawgolemHarvestController(StrawGolem animatable) {
         super(animatable, "harvest", StrawgolemHarvestController::predicate);
-        registerCustomInstructionListener(event -> {
-            if (event.instructions.equals("completeHarvest")) {
+        setCustomInstructionKeyframeHandler(event -> {
+            if (event.getKeyframeData().getInstructions().equals("completeHarvest")) {
                 animatable.setPickingUpBlock(false);
                 animatable.setPickingUpItem(false);
             }

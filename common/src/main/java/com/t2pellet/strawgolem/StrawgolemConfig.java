@@ -3,7 +3,10 @@ package com.t2pellet.strawgolem;
 import com.t2pellet.tlib.config.api.Config;
 import com.t2pellet.tlib.config.api.property.*;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,13 +50,13 @@ public class StrawgolemConfig extends Config {
         public static final IntProperty repairChance = new IntProperty(3, 1 ,100);
         @Entry(comment = "Item to repair the golem with. Requires restart")
         public static final StringProperty repairItem = new StringProperty("minecraft:wheat", s -> {
-            return ResourceLocation.isValidResourceLocation(s) && Registry.ITEM.containsKey(new ResourceLocation(s));
+            return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
         });
         @Entry(comment = "Durability for barrels equipped to a straw golem")
         public static final IntProperty barrelDurability = new IntProperty(100, 1, 1000);
         @Entry(comment = "Item to repair barrels with. Requires restart")
         public static final StringProperty barrelItem = new StringProperty("minecraft:planks", s -> {
-            return ResourceLocation.isValidResourceLocation(s) && Registry.ITEM.containsKey(new ResourceLocation(s));
+            return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
         });
         @Entry(comment = "How much durability to restore from barrelItem. Set to zero to disable")
         public static final IntProperty barrelRepairAmount = new IntProperty(25, 0, 250);
@@ -103,7 +106,7 @@ public class StrawgolemConfig extends Config {
 
     private static ListProperty<String> createBlockIDList() {
         return ListProperty.of(new ArrayList<>(), (s) -> {
-            return ResourceLocation.isValidResourceLocation(s) && Registry.BLOCK.containsKey(new ResourceLocation(s));
+            return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.BLOCK.containsKey(new ResourceLocation(s));
         });
     }
 }
