@@ -1,5 +1,6 @@
 package com.t2pellet.strawgolem.mixin;
 
+import com.mojang.authlib.GameProfile;
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.strawgolem.entity.StrawGolemOrderer;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -15,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Optional;
 
 @Mixin(Player.class)
-public class PlayerMixin implements StrawGolemOrderer {
+public abstract class PlayerMixin implements StrawGolemOrderer {
 
     private static final EntityDataAccessor<Integer> GOLEM_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.INT);
 

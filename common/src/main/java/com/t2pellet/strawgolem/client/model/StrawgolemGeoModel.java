@@ -69,11 +69,13 @@ public class StrawgolemGeoModel extends GeoModel<StrawGolem> {
     }
 
     public void translateToHand(PoseStack poseStack) {
-        GeoBone arms = getBone("arms").get();
-        GeoBone upper = getBone("upper").get();
-        RenderUtils.prepMatrixForBone(poseStack, upper);
-        RenderUtils.translateAndRotateMatrixForBone(poseStack, upper);
-        RenderUtils.prepMatrixForBone(poseStack, arms);
-        RenderUtils.translateAndRotateMatrixForBone(poseStack, arms);
+        if (getBone("arms").isPresent() && getBone("upper").isPresent()) {
+            GeoBone arms = getBone("arms").get();
+            GeoBone upper = getBone("upper").get();
+            RenderUtils.prepMatrixForBone(poseStack, upper);
+            RenderUtils.translateAndRotateMatrixForBone(poseStack, upper);
+            RenderUtils.prepMatrixForBone(poseStack, arms);
+            RenderUtils.translateAndRotateMatrixForBone(poseStack, arms);
+        }
     }
 }
