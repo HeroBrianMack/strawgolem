@@ -83,10 +83,6 @@ dependencies {
     implementation fg.deobf("curse.maven:animal-feeding-trough-445838:${project.feeding_trough_forge_version}")
     implementation fg.deobf("curse.maven:architectury-api-419699:${project.architectury_forge_id}")
     implementation("com.eliotlash.mclib:mclib:20")
-//    minecraftLibrary 'org.ini4j:ini4j:0.5.4'
-//    jarJar(group: 'org.ini4j', name: 'ini4j', version: '[0.5.0,0.6.0)') {
-//        jarJar.pin(it, '0.5.4')
-//    }
     implementation fg.deobf("curse.maven:haybale-1-20-1-1092172:${project.tlib_forge_version}")
 }
 
