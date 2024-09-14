@@ -24,7 +24,7 @@ class DecayImpl<E extends LivingEntity & ICapabilityHaver> extends AbstractCapab
 
     @Override
     public void decay() {
-        if (!StrawgolemConfig.Lifespan.enabled.get()) return;
+        if (!StrawgolemConfig.Lifespan.enabled.get() || state == null) return;
 
         int ticksToDecay = StrawgolemConfig.Lifespan.ticksToDecayCheck.get();
         int decayChance = StrawgolemConfig.Lifespan.decayChance.get();
@@ -77,7 +77,9 @@ class DecayImpl<E extends LivingEntity & ICapabilityHaver> extends AbstractCapab
     public Tag writeTag() {
         CompoundTag tag = new CompoundTag();
         tag.putInt("ticksSinceLastDecay", ticksSinceLastDecay);
-        tag.putInt("decayState", state.getValue());
+        if (state != null) {
+            tag.putInt("decayState", state.getValue());
+        }
         return tag;
     }
 
