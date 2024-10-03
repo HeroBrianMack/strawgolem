@@ -9,6 +9,7 @@ import com.t2pellet.strawgolem.entity.capabilities.decay.DecayState;
 import com.t2pellet.strawgolem.entity.capabilities.deliverer.Deliverer;
 import com.t2pellet.strawgolem.entity.capabilities.harvester.Harvester;
 import com.t2pellet.strawgolem.entity.capabilities.held_item.HeldItem;
+import com.t2pellet.strawgolem.entity.capabilities.hunger.Hunger;
 import com.t2pellet.strawgolem.entity.capabilities.tether.Tether;
 import com.t2pellet.strawgolem.entity.goals.golem.*;
 import com.t2pellet.strawgolem.registry.StrawgolemItems;
@@ -69,6 +70,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
 
     // Synched Data
     private static final EntityDataAccessor<Boolean> IS_SCARED = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_STARVING = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HAS_HAT = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> BARREL_HEALTH = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> HARVESTING_ITEM = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
@@ -77,6 +79,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     // Capabilities
     CapabilityManager capabilities = CapabilityManager.newInstance(this);
     private final Decay decay;
+    private final Hunger hunger;
     private final HeldItem heldItem;
     private final Harvester harvester;
     private final Deliverer deliverer;
@@ -96,6 +99,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     public StrawGolem(EntityType<? extends StrawGolem> type, Level level) {
         super(type, level);
         decay = capabilities.addCapability(Decay.class);
+        hunger = capabilities.addCapability(Hunger.class);
         heldItem = capabilities.addCapability(HeldItem.class);
         harvester = capabilities.addCapability(Harvester.class);
         deliverer = capabilities.addCapability(Deliverer.class);
@@ -106,6 +110,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(IS_SCARED, false);
+        this.entityData.define(IS_STARVING, false);
         this.entityData.define(HAS_HAT, false);
         this.entityData.define(BARREL_HEALTH, 0);
         this.entityData.define(HARVESTING_ITEM, false);
@@ -154,7 +159,8 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     }
 
     private void baseServerTick() {
-        getDecay().decay();
+        //getDecay().decay();
+        getHunger().hunger(isRunning());
         if (isInWaterOrRain()) {
             if (isInWater()) {
                 if (StrawgolemConfig.Lifespan.waterAcceleratesDecay.get()) getDecay().decay();
@@ -301,6 +307,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     }
 
     public boolean isRunning() {
+        System.out.println(getSpeed());
         return getSqrMovement() >= RUN_DISTANCE;
     }
 
@@ -336,6 +343,14 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
         this.entityData.set(IS_SCARED, isScared);
     }
 
+    public boolean isStarving() {
+        return entityData.get(IS_STARVING);
+    }
+
+    public void setIsStarving(boolean isStarving) {
+        this.entityData.set(IS_STARVING, isStarving);
+    }
+
     public boolean hasBarrel() {
      return entityData.get(BARREL_HEALTH) > 0;
     }
@@ -367,6 +382,10 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
 
     public Decay getDecay() {
         return decay;
+    }
+
+    public Hunger getHunger() {
+        return hunger;
     }
 
     public HeldItem getHeldItem() {
