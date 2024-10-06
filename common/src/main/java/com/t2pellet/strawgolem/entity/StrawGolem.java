@@ -10,6 +10,7 @@ import com.t2pellet.strawgolem.entity.capabilities.deliverer.Deliverer;
 import com.t2pellet.strawgolem.entity.capabilities.harvester.Harvester;
 import com.t2pellet.strawgolem.entity.capabilities.held_item.HeldItem;
 import com.t2pellet.strawgolem.entity.capabilities.hunger.Hunger;
+import com.t2pellet.strawgolem.entity.capabilities.hunger.HungerState;
 import com.t2pellet.strawgolem.entity.capabilities.tether.Tether;
 import com.t2pellet.strawgolem.entity.goals.golem.*;
 import com.t2pellet.strawgolem.registry.StrawgolemItems;
@@ -60,22 +61,26 @@ import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import software.bernie.geckolib.util.RenderUtils;
 
+import java.util.UUID;
+
 // TODO : Fix bug - not always walking fully to destination
 public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabilityHaver {
 
     public static final Item REPAIR_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
+    public static final Item FEED_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.feedItem.get()));
+
     public static final Item BARREL_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.barrelItem.get()));
     private static final double WALK_DISTANCE = 0.00000001D;
     private static final double RUN_DISTANCE = 0.003D;
 
     // Synched Data
     private static final EntityDataAccessor<Boolean> IS_SCARED = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> IS_STARVING = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
+//    private static final EntityDataAccessor<Boolean> IS_STARVING = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HAS_HAT = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> BARREL_HEALTH = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> HARVESTING_ITEM = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HARVESTING_BLOCK = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
-
+    public static final double defaultMovement = 0.23;
     // Capabilities
     CapabilityManager capabilities = CapabilityManager.newInstance(this);
     private final Decay decay;
@@ -84,17 +89,23 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     private final Harvester harvester;
     private final Deliverer deliverer;
     private final Tether tether;
+    public static final UUID movementSpeedUID = UUID.randomUUID();
 
     // Misc
     private boolean isFirstTick = true;
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
-                .add(Attributes.MOVEMENT_SPEED, 0.23)
+                .add(Attributes.MOVEMENT_SPEED, defaultMovement)
                 .add(Attributes.MAX_HEALTH, StrawgolemConfig.Lifespan.baseHealth.get());
     }
 
     private final AnimatableInstanceCache instanceCache = GeckoLibUtil.createInstanceCache(this);
+
+    // The values here don't particularly matter
+    // These are meant to change to account for hunger
+//    public float golemWalkSpeed = StrawgolemConfig.Behaviour.golemWalkSpeed.get();
+//    public float golemRunSpeed = StrawgolemConfig.Behaviour.golemRunSpeed.get();
 
     public StrawGolem(EntityType<? extends StrawGolem> type, Level level) {
         super(type, level);
@@ -110,7 +121,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(IS_SCARED, false);
-        this.entityData.define(IS_STARVING, false);
+//        this.entityData.define(IS_STARVING, false);
         this.entityData.define(HAS_HAT, false);
         this.entityData.define(BARREL_HEALTH, 0);
         this.entityData.define(HARVESTING_ITEM, false);
@@ -131,6 +142,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
         this.goalSelector.addGoal(1, new GolemFleeEntityGoal<>(this, Cow.class, 8.0F,  false));
         this.goalSelector.addGoal(1, new GolemPanicGoal(this));
         this.goalSelector.addGoal(2, new GolemTemptGoal(this));
+        this.goalSelector.addGoal(2, new GolemFoodGoal(this));
         this.goalSelector.addGoal(2, new GolemBeShyGoal(this));
         this.goalSelector.addGoal(3, new HarvestCropGoal(this));
         this.goalSelector.addGoal(3, new DeliverCropGoal(this));
@@ -159,8 +171,9 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     }
 
     private void baseServerTick() {
-        //getDecay().decay();
-        getHunger().hunger(isRunning());
+        getDecay().decay();
+        getHunger().hunger(this);
+        isStarving();
         if (isInWaterOrRain()) {
             if (isInWater()) {
                 if (StrawgolemConfig.Lifespan.waterAcceleratesDecay.get()) getDecay().decay();
@@ -178,6 +191,9 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     private void baseCommonTick() {
         if (getDecay().getState() == DecayState.DYING && getRandom().nextInt(StrawgolemConfig.Visual.dyingGolemFlyChance.get()) == 0) {
             spawnFlyParticle();
+        }
+        if (getHunger().getState() == HungerState.STARVING && getRandom().nextInt(StrawgolemConfig.Visual.starvingGolemFoodChance.get()) == 0) {
+            spawnFoodParticle();
         }
     }
 
@@ -210,7 +226,15 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
                 playSound(StrawgolemSounds.GOLEM_HEAL.get());
             }
             return InteractionResult.SUCCESS;
-        } else if (item.getItem() == StrawgolemItems.strawHat.get() && !hasHat()) {
+        } else if(item.getItem() == FEED_ITEM && hunger.getState() != HungerState.FULL) {
+            boolean success = hunger.feed(this);
+            if (success) {
+                spawnHappyParticle();
+                item.shrink(1);
+                playSound(StrawgolemSounds.GOLEM_HEAL.get());
+            }
+            return InteractionResult.SUCCESS;
+        }else if (item.getItem() == StrawgolemItems.strawHat.get() && !hasHat()) {
             this.entityData.set(HAS_HAT, true);
             item.shrink(1);
             return InteractionResult.SUCCESS;
@@ -307,7 +331,6 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     }
 
     public boolean isRunning() {
-        System.out.println(getSpeed());
         return getSqrMovement() >= RUN_DISTANCE;
     }
 
@@ -344,11 +367,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     }
 
     public boolean isStarving() {
-        return entityData.get(IS_STARVING);
-    }
-
-    public void setIsStarving(boolean isStarving) {
-        this.entityData.set(IS_STARVING, isStarving);
+        return getHunger().getState() == HungerState.STARVING;
     }
 
     public boolean hasBarrel() {
@@ -469,6 +488,12 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
         Vec3 pos = position();
         Vec3 movement = getDeltaMovement();
         level().addParticle(StrawgolemParticles.FLY_PARTICLE.get(), pos.x, pos.y + 0.15F, pos.z, movement.x, movement.y + 0.15F, movement.z);
+    }
+
+    private void spawnFoodParticle() {
+        Vec3 pos = position();
+        Vec3 movement = getDeltaMovement();
+        level().addParticle(StrawgolemParticles.FOOD_PARTICLE.get(), pos.x, pos.y + 0.15F, pos.z, movement.x, movement.y + 0.15F, movement.z);
     }
 
     private void spawnHappyParticle() {

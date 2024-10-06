@@ -33,7 +33,7 @@ public class HarvestCropGoal extends MoveToBlockGoal {
 
     @Override
     public boolean canUse() {
-        if (golem.getHeldItem().has()) return false;
+        if (golem.isStarving() || golem.getHeldItem().has()) return false;
         Optional<BlockPos> harvestPos = golem.getHarvester().startHarvest();
         if (harvestPos.isPresent()) {
             blockPos = harvestPos.get();

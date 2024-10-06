@@ -12,12 +12,14 @@ public class StrawgolemJadePlugin implements IWailaPlugin, IEntityComponentProvi
 
     private static final ResourceLocation UUID = new ResourceLocation(Constants.MOD_ID, "strawgolem");
     private static final ResourceLocation DECAY = new ResourceLocation(Constants.MOD_ID, "strawgolem_decay");
+    private static final ResourceLocation HUNGER = new ResourceLocation(Constants.MOD_ID, "strawgolem_hunger");
     private static final ResourceLocation BARREL = new ResourceLocation(Constants.MOD_ID, "strawgolem_barrel");
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerEntityComponent(this, StrawGolem.class);
         registration.addConfig(DECAY, true);
+        registration.addConfig(HUNGER, true);
         registration.addConfig(BARREL, true);
     }
 
@@ -27,6 +29,11 @@ public class StrawgolemJadePlugin implements IWailaPlugin, IEntityComponentProvi
             StrawGolem golem = (StrawGolem) entityAccessor.getEntity();
             String decay = golem.getDecay().getState().getDescription();
             iTooltip.add(Component.translatable(decay));
+        }
+        if (iPluginConfig.get(HUNGER)) {
+            StrawGolem golem = (StrawGolem) entityAccessor.getEntity();
+            String hunger = golem.getHunger().getState().getDescription();
+            iTooltip.add(Component.translatable(hunger));
         }
         if (iPluginConfig.get(BARREL)) {
             StrawGolem golem = (StrawGolem) entityAccessor.getEntity();

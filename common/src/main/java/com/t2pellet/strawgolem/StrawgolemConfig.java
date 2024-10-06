@@ -46,10 +46,16 @@ public class StrawgolemConfig extends Config {
         public static final IntProperty ticksToDecayCheck = new IntProperty(6000);
         @Entry(comment = "Chance to decay on check. Its 1 in whatever number is here. So decayChance=5 means 1/5 chance")
         public static final IntProperty decayChance = new IntProperty(4, 1, 100);
+        @Entry(comment = "How many ticks before a golem increases its hunger state")
+        public static final IntProperty hungerTicks = new IntProperty(24000);
         @Entry(comment = "Chance to repair on wheat usage. Same logic as decayChance")
         public static final IntProperty repairChance = new IntProperty(3, 1 ,100);
         @Entry(comment = "Item to repair the golem with. Requires restart")
         public static final StringProperty repairItem = new StringProperty("minecraft:wheat", s -> {
+            return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
+        });
+        @Entry(comment = "Item to feed the golem with. Requires restart")
+        public static final StringProperty feedItem = new StringProperty("minecraft:apple", s -> {
             return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
         });
         @Entry(comment = "Durability for barrels equipped to a straw golem")
@@ -102,6 +108,8 @@ public class StrawgolemConfig extends Config {
         public static final BoolProperty showHarvestBlockAnimation = new BoolProperty(true);
         @Entry(comment = "Chance per tick for a dying golem to spawn a fly particle. Higher # = lower chance")
         public static final IntProperty dyingGolemFlyChance = new IntProperty(80, 1, 2000);
+        @Entry(comment = "Chance per tick for a dying golem to spawn a food particle. Higher # = lower chance")
+        public static final IntProperty starvingGolemFoodChance = new IntProperty(160, 1, 2000);
     }
 
     private static ListProperty<String> createBlockIDList() {

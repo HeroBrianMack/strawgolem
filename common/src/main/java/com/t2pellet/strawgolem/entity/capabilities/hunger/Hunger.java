@@ -1,7 +1,7 @@
 package com.t2pellet.strawgolem.entity.capabilities.hunger;
 
 
-import com.t2pellet.strawgolem.entity.capabilities.hunger.HungerImpl;
+import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.tlib.entity.capability.api.Capability;
 import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
 import net.minecraft.world.entity.Entity;
@@ -13,10 +13,10 @@ public interface Hunger extends Capability {
         return new HungerImpl<>((LivingEntity & ICapabilityHaver) entity);
     }
 
-    void hunger(boolean isRunning);
+    void hunger(StrawGolem golem);
     void setFromHealth();
 
-    boolean repair(boolean isRunning);
+    boolean feed(StrawGolem golem);
 
     HungerState getState();
 

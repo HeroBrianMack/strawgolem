@@ -9,6 +9,9 @@ public class StrawgolemParticles implements RegistryClass {
 
     @IRegistryEntry
     public static final ParticleEntryType FLY_PARTICLE = new ParticleEntryType("fly");
+    @IRegistryEntry
+    public static final ParticleEntryType FOOD_PARTICLE = new ParticleEntryType("food");
+
 
 
 }

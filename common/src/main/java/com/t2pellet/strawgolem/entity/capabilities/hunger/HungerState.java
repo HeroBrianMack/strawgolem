@@ -1,15 +1,21 @@
 package com.t2pellet.strawgolem.entity.capabilities.hunger;
 
 import com.t2pellet.strawgolem.StrawgolemConfig;
+import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.strawgolem.entity.capabilities.decay.DecayState;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public enum HungerState {
-    // TO DO, CHANGE FROM HEALTH TO MOVEMENT
+    // TO DO IMPLEMENT SPEED, NEED TO MODIFY UPPER CLASSES
+    // For others reading this: I'm just writing that I need to
+    // modify classes calling these methods now.
 
-    FULL("strawgolem.health.new", 0),
-    PECKISH("strawgolem.health.old", 1),
-    HUNGRY("strawgolem.health.withered", 2),
-    STARVING("strawgolem.health.dying", 3);
+    FULL("strawgolem.hunger.full", 0),
+    PECKISH("strawgolem.hunger.peckish", 1),
+    HUNGRY("strawgolem.hunger.hungry", 2),
+    STARVING("strawgolem.hunger.starving", 3);
 
     private final String description;
     private final int value;
@@ -30,21 +36,35 @@ public enum HungerState {
         return null;
     }
 
+    public String getDescription() {
+        return description;
+    }
     // TO DO
     // Convert to movement with formula:
-    // Base Movement / (state.value() + 1)
+    // Base Movement / (state.value())
     // Ex: Hungry = Base / 3
     // May use unique formula
-    public float getSpeed(boolean isRunning) {
+    public void getSpeed(StrawGolem golem) {
         int hungerStates = HungerState.values().length;
         float speedRatio = (float) (hungerStates - value) / hungerStates;
-        float speedValue = speedRatio;
-        if (isRunning) {
-            speedValue *= StrawgolemConfig.Behaviour.golemRunSpeed.get();
-        } else {
-            speedValue *= StrawgolemConfig.Behaviour.golemWalkSpeed.get();
+        float speedValue = (float) (StrawGolem.defaultMovement * speedRatio);
+        if (value == 3) {
+
         }
-        //System.out.println(speedValue);
-        return speedValue;
+      //golem.golemWalkSpeed = StrawgolemConfig.Behaviour.golemWalkSpeed.get() * speedRatio;
+        golem.setSpeed(speedValue);
+//      // Not Starving
+//        if (value != 3) {
+//            golem.golemRunSpeed = StrawgolemConfig.Behaviour.golemRunSpeed.get() * speedRatio;
+//            System.out.println("Not Starving");
+//            return;
+//
+//        }
+//
+//        // Desperation Running Mechanic
+//        //System.out.println(golem.isScared());
+//        golem.golemWalkSpeed = StrawgolemConfig.Behaviour.golemRunSpeed.get();
+//        golem.golemRunSpeed = StrawgolemConfig.Behaviour.golemRunSpeed.get();
+        golem.getAttributes().getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(speedValue);
     }
 }

@@ -1,5 +1,6 @@
 package com.t2pellet.strawgolem.entity.capabilities.hunger;
 
+import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.tlib.entity.capability.api.AbstractCapability;
 import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
 import net.minecraft.nbt.CompoundTag;
@@ -10,14 +11,25 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 public class HungerImpl <E extends LivingEntity & ICapabilityHaver> extends AbstractCapability<E> implements Hunger{
     private HungerState state = HungerState.FULL;
     int hungerTime;
+    private final int hungerTicks = 100;
     protected HungerImpl(E e) {
         super(e);
-        this.hungerTime = 100;
+        this.hungerTime = hungerTicks;
     }
 
     @Override
-    public void hunger(boolean isRunning) {
-        updateSpeedFromState(true, isRunning);
+    public void hunger(StrawGolem golem) {
+        if (state != HungerState.STARVING) {
+            hungerTime--;
+            if (hungerTime <= 0) {
+                hungerTime = hungerTicks;
+                state = HungerState.fromValue(state.getValue() + 1);
+            }
+        }
+        updateSpeedFromState(true, golem);
+        if (golem.isAlive()) {
+            synchronize();
+        }
     }
 
     @Override
@@ -26,17 +38,17 @@ public class HungerImpl <E extends LivingEntity & ICapabilityHaver> extends Abst
     }
 
     @Override
-    public boolean repair(boolean isRunning) {
+    public boolean feed(StrawGolem golem) {
         if (state == HungerState.FULL) return false;
             state = HungerState.fromValue(state.getValue() - 1);
-            updateSpeedFromState(true, isRunning);
+            updateSpeedFromState(true, golem);
         synchronize();
         return true;
     }
 
-    private void updateSpeedFromState(boolean shouldUpdate, boolean isRunning) {
-//        float speed = state.getSpeed(isRunning);
-//
+    private void updateSpeedFromState(boolean shouldUpdate, StrawGolem golem) {
+        state.getSpeed(golem);
+
 //        entity.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(speed);
 //        if (shouldUpdate /*|| entity.getSpeed() > speed*/) entity.setSpeed(speed);
     }

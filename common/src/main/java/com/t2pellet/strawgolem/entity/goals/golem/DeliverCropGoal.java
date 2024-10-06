@@ -2,6 +2,7 @@ package com.t2pellet.strawgolem.entity.goals.golem;
 
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
+import com.t2pellet.strawgolem.entity.capabilities.hunger.HungerState;
 import com.t2pellet.strawgolem.registry.StrawgolemSounds;
 import com.t2pellet.strawgolem.util.container.ContainerUtil;
 import net.minecraft.core.BlockPos;
@@ -30,7 +31,7 @@ public class DeliverCropGoal extends MoveToBlockGoal {
 
     @Override
     public boolean canUse() {
-        return golem.getHeldItem().has() && !golem.isPickingUpItem() && !golem.isPickingUpBlock() && findNearestBlock();
+        return !golem.isStarving() && golem.getHeldItem().has() && !golem.isPickingUpItem() && !golem.isPickingUpBlock() && findNearestBlock();
     }
 
     @Override
