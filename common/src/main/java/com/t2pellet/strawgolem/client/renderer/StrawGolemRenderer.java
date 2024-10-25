@@ -45,6 +45,7 @@ public class StrawGolemRenderer extends GeoEntityRenderer<StrawGolem> {
                 buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
     }
 
+
     private void shiver(StrawGolem animatable, PoseStack poseStack) {
         double offX = animatable.getRandom().nextDouble() / 32 - 1 / 64F;
         double offZ = animatable.getRandom().nextDouble() / 32 - 1 / 64F;
