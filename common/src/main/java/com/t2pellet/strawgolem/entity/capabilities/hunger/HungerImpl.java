@@ -1,5 +1,6 @@
 package com.t2pellet.strawgolem.entity.capabilities.hunger;
 
+import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.tlib.entity.capability.api.AbstractCapability;
 import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
@@ -11,7 +12,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 public class HungerImpl <E extends LivingEntity & ICapabilityHaver> extends AbstractCapability<E> implements Hunger{
     private HungerState state = HungerState.FULL;
     int hungerTime;
-    private final int hungerTicks = 100;
+    private final int hungerTicks = StrawgolemConfig.Lifespan.hungerTicks.get();
     protected HungerImpl(E e) {
         super(e);
         this.hungerTime = hungerTicks;
