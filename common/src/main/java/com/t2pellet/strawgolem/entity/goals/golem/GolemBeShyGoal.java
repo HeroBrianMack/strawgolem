@@ -37,6 +37,6 @@ public class GolemBeShyGoal extends GolemFleeEntityGoal<Player> {
     }
 
     private boolean isTempting() {
-        return toAvoid != null && toAvoid.isHolding(StrawGolem.REPAIR_ITEM);
+        return toAvoid != null && (toAvoid.isHolding(StrawGolem.REPAIR_ITEM) || toAvoid.isHolding(StrawGolem.FEED_ITEM));
     }
 }

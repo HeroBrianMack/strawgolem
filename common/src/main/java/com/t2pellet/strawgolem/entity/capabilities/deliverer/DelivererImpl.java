@@ -39,7 +39,6 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
             clearData();
         }
         Optional<BlockPos> cachedPos = closestRememberedValidDeliverable();
-        System.out.println(cachedPos);
         return cachedPos.orElseGet(() -> scanForDeliverable(entity.blockPosition()));
     }
 
