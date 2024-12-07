@@ -16,16 +16,15 @@ public class VisibilityUtil {
 
     @Deprecated
     public static boolean canSee(LivingEntity e, BlockPos query) {
-//        Level level = e.level();
-//        Vec3 entityPos = e.getEyePosition();
-//        Vec3 queryPos = Vec3.atCenterOf(query);
-//        ClipContext ctx = new ClipContext(entityPos, queryPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, e);
-//        BlockHitResult result = level.clip(ctx);
-//        ClipContext ctx2 = new ClipContext(entityPos, queryPos, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, e);
-//        BlockHitResult result2 = level.clip(ctx2);
-
-//        return result.getBlockPos().equals(query) || result.getBlockPos().equals(result2);
-        return isNearby(e, query);
+        if (StrawgolemConfig.Harvesting.newAI.get()) {
+            return isNearby(e, query);
+        }
+        Level level = e.level();
+        Vec3 entityPos = e.getEyePosition();
+        Vec3 queryPos = Vec3.atCenterOf(query);
+        ClipContext ctx = new ClipContext(entityPos, queryPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, e);
+        BlockHitResult result = level.clip(ctx);
+        return result.getBlockPos().equals(query);
     }
 
 
