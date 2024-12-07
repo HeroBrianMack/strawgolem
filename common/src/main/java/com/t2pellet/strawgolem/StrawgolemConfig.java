@@ -20,13 +20,15 @@ public class StrawgolemConfig extends Config {
 
     @Section(name = "Harvesting", description = "Harvesting related options")
     public static class Harvesting {
-        @Entry(comment = "Range for golems to harvest (and deliver to a chest)")
+        @Entry(comment = "Whether the golem should use the new AI when finding crops")
+        public static final BoolProperty newAI = new BoolProperty(true);
+        @Entry(comment = "Range for golems to harvest and deliver to a chest")
         public static final IntProperty harvestRange = new IntProperty(24, 8, 48);
         @Entry(comment = "Whether the golem should harvest gourd blocks like pumpkins and melons. Will apply over whitelist, but specific gourd blocks can still be blacklisted.")
         public static final BoolProperty shouldHarvestBlocks = new BoolProperty(true);
         @Entry(comment = "Blacklisted crops. Must use valid resource locations")
         public static final ListProperty<String> blacklist = createBlockIDList();
-        @Entry(comment = "Whether to enable whitelist. Will ignore blacklist")
+        @Entry(comment = "Whether to enable whitelist. (Will ignore blacklist)")
         public static final BoolProperty enableWhitelist = new BoolProperty(false);
         @Entry(comment = "Whitelisted crops. Only applies if enableWhitelist=true. Must use valid resource locations")
         public static final ListProperty<String>  whitelist = createBlockIDList();
@@ -40,27 +42,27 @@ public class StrawgolemConfig extends Config {
         public static final IntProperty baseHealth = new IntProperty(6, 1, 10);
         @Entry(comment = "Whether being in the rain accelerates decay")
         public static final BoolProperty rainAcceleratesDecay = new BoolProperty(true);
-        @Entry(comment = "Whether being in water accelerated decay")
+        @Entry(comment = "Whether being in water accelerates decay")
         public static final BoolProperty waterAcceleratesDecay = new BoolProperty(true);
         @Entry(comment = "How many ticks before checking to see if golem decays")
         public static final IntProperty ticksToDecayCheck = new IntProperty(6000);
-        @Entry(comment = "Chance to decay on check. Its 1 in whatever number is here. So decayChance=5 means 1/5 chance")
+        @Entry(comment = "Chance to decay on check. (decayChance=5 means 1/5 chance)")
         public static final IntProperty decayChance = new IntProperty(4, 1, 100);
         @Entry(comment = "How many ticks before a golem increases its hunger state")
         public static final IntProperty hungerTicks = new IntProperty(24000);
-        @Entry(comment = "Chance to repair on wheat usage. Same logic as decayChance")
+        @Entry(comment = "Chance to repair on wheat usage. (repairChance=5 means 1/5 chance)")
         public static final IntProperty repairChance = new IntProperty(3, 1 ,100);
-        @Entry(comment = "Item to repair the golem with. Requires restart")
+        @Entry(comment = "Item to repair the golem with. (Requires restart)")
         public static final StringProperty repairItem = new StringProperty("minecraft:wheat", s -> {
             return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
         });
-        @Entry(comment = "Item to feed the golem with. Requires restart")
+        @Entry(comment = "Item to feed the golem with. (Requires restart)")
         public static final StringProperty feedItem = new StringProperty("minecraft:apple", s -> {
             return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
         });
         @Entry(comment = "Durability for barrels equipped to a straw golem")
         public static final IntProperty barrelDurability = new IntProperty(100, 1, 1000);
-        @Entry(comment = "Item to repair barrels with. Requires restart")
+        @Entry(comment = "Item to repair barrels with. (Requires restart)")
         public static final StringProperty barrelItem = new StringProperty("minecraft:planks", s -> {
             return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
         });
@@ -102,9 +104,9 @@ public class StrawgolemConfig extends Config {
         public static final BoolProperty golemShiversWhenCold = new BoolProperty(true);
         @Entry(comment = "Whether the golem texture should change as it decays")
         public static final BoolProperty golemDecayingTexture = new BoolProperty(true);
-        @Entry(comment = "Show harvesting animation for regular crops. Requires restart")
+        @Entry(comment = "Show harvesting animation for regular crops. (Requires restart)")
         public static final BoolProperty showHarvestItemAnimation = new BoolProperty(true);
-        @Entry(comment = "Show harvesting animation for block crops. Requires restart")
+        @Entry(comment = "Show harvesting animation for block crops. (Requires restart)")
         public static final BoolProperty showHarvestBlockAnimation = new BoolProperty(true);
         @Entry(comment = "Chance per tick for a dying golem to spawn a fly particle. Higher # = lower chance")
         public static final IntProperty dyingGolemFlyChance = new IntProperty(80, 1, 2000);
