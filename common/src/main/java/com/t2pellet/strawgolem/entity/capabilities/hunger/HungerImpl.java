@@ -20,6 +20,7 @@ public class HungerImpl <E extends LivingEntity & ICapabilityHaver> extends Abst
 
     @Override
     public void hunger(StrawGolem golem) {
+        if (!StrawgolemConfig.Lifespan.enabled.get() || state == null) return;
         if (state != HungerState.STARVING) {
             hungerTime--;
             if (hungerTime <= 0) {
