@@ -20,6 +20,7 @@ import com.t2pellet.tlib.Services;
 import com.t2pellet.tlib.entity.capability.api.CapabilityManager;
 import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -43,6 +44,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
@@ -50,6 +52,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.phys.Vec3;
@@ -61,6 +64,9 @@ import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import software.bernie.geckolib.util.RenderUtils;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 // TODO : Fix bug - not always walking fully to destination
@@ -90,7 +96,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     private final Deliverer deliverer;
     private final Tether tether;
     public static final UUID movementSpeedUID = UUID.randomUUID();
-
+    private static Set<Item> validPickupItems;
     // Misc
     private boolean isFirstTick = true;
 
@@ -160,6 +166,14 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     @Override
     public void baseTick() {
         super.baseTick();
+//        if (goalSelector.getRunningGoals().toArray().length != 0) {
+//            System.out.println("GOALS:");
+//            for (Object obj : goalSelector.getRunningGoals().toArray()) {
+//                if (obj instanceof WrappedGoal w)
+//                    System.out.print(" " + w.getGoal().getClass().getSimpleName());
+//            }
+//            System.out.println();
+//        }
         if (level().isClientSide) baseClientTick();
         else baseServerTick();
         baseCommonTick();
@@ -460,6 +474,44 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     @Override
     protected SoundEvent getDeathSound() {
         return StrawgolemSounds.GOLEM_DEATH.get();
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+//        System.out.println("AI");
+        this.level().getProfiler().push("looting");
+        Vec3i vec3i = this.getPickupReach();
+
+        if (!this.level().isClientSide && this.isAlive() && !this.dead && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+            for(ItemEntity itementity : this.level().getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ()))) {
+                if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && this.wantsToPickUp(itementity.getItem())) {
+                    this.setItemSlot(EquipmentSlot.MAINHAND, itementity.getItem());
+
+                    itementity.discard();
+                }
+            }
+        }
+
+        this.level().getProfiler().pop();
+    }
+
+    @Override
+    public boolean wantsToPickUp(ItemStack item) {
+        System.out.println("Test");
+
+        return this.canHoldItem(item);
+    }
+
+    public boolean canHoldItem(ItemStack item) {
+        if (validPickupItems == null) {
+            validPickupItems = new HashSet<>();
+            validPickupItems.add(Items.APPLE);
+        }
+        if (!heldItem.get().getItem().equals(Items.AIR)) {
+            return false;
+        }
+        return validPickupItems.contains(item.getItem());
     }
 
     /* Helpers */
