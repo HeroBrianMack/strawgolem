@@ -68,6 +68,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 // TODO : Fix bug - not always walking fully to destination
 public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabilityHaver {
@@ -96,9 +97,13 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     private final Deliverer deliverer;
     private final Tether tether;
     public static final UUID movementSpeedUID = UUID.randomUUID();
-    private static Set<Item> validPickupItems;
+
     // Misc
     private boolean isFirstTick = true;
+
+    private static Set<Item> validPickupItems;
+    // For those looking at this code being confused, this is for the test(T) method for predicate.
+    public Predicate<ItemEntity> validGolemItems = this::canHoldItem;
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
@@ -152,6 +157,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
         this.goalSelector.addGoal(2, new GolemBeShyGoal(this));
         this.goalSelector.addGoal(3, new HarvestCropGoal(this));
         this.goalSelector.addGoal(3, new DeliverCropGoal(this));
+        this.goalSelector.addGoal(3, new GolemPickupItemGoal(this));
         this.goalSelector.addGoal(5, new ReturnToTetherGoal(this));
         this.goalSelector.addGoal(6, new GolemWanderGoal(this));
         if (Services.PLATFORM.isModLoaded("animal_feeding_trough")) {
@@ -482,9 +488,10 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
 //        System.out.println("AI");
         this.level().getProfiler().push("looting");
         Vec3i vec3i = this.getPickupReach();
-
+        Vec3 vec = new Vec3(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+        vec = vec.scale(1.7D);
         if (!this.level().isClientSide && this.isAlive() && !this.dead && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-            for(ItemEntity itementity : this.level().getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ()))) {
+            for(ItemEntity itementity : this.level().getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate((double)vec.x(), (double)vec.y(), (double)vec.z()))) {
                 if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && this.wantsToPickUp(itementity.getItem())) {
                     this.setItemSlot(EquipmentSlot.MAINHAND, itementity.getItem());
 
@@ -508,10 +515,19 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
             validPickupItems = new HashSet<>();
             validPickupItems.add(Items.APPLE);
         }
-        if (!heldItem.get().getItem().equals(Items.AIR)) {
+        if (!heldItem.get().isEmpty()) {
             return false;
         }
         return validPickupItems.contains(item.getItem());
+    }
+
+    /**
+     * Helper method for saving me effort converting entities to stacks.
+     * @param entity The ItemEntity being converted into an ItemStack.
+     * @return If the StrawGolem can hold the item.
+     */
+    private boolean canHoldItem(ItemEntity entity) {
+        return canHoldItem(entity.getItem());
     }
 
     /* Helpers */
@@ -555,5 +571,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
         double z = random.nextFloat() + pos.z - 0.5F;
         level().addParticle(ParticleTypes.HAPPY_VILLAGER, x, pos.y + 0.85F, z, movement.x, movement.y, movement.z);
     }
+
+
 
 }
