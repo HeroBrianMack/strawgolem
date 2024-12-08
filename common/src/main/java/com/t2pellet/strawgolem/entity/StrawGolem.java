@@ -485,7 +485,6 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     @Override
     public void aiStep() {
         super.aiStep();
-//        System.out.println("AI");
         this.level().getProfiler().push("looting");
         Vec3i vec3i = this.getPickupReach();
         Vec3 vec = new Vec3(vec3i.getX(), vec3i.getY(), vec3i.getZ());
@@ -505,7 +504,6 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
 
     @Override
     public boolean wantsToPickUp(ItemStack item) {
-        System.out.println("Test");
 
         return this.canHoldItem(item);
     }
