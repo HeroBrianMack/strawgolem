@@ -490,7 +490,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
         Vec3 vec = new Vec3(vec3i.getX(), vec3i.getY(), vec3i.getZ());
         vec = vec.scale(1.7D);
         if (!this.level().isClientSide && this.isAlive() && !this.dead && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-            for(ItemEntity itementity : this.level().getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate((double)vec.x(), (double)vec.y(), (double)vec.z()))) {
+            for(ItemEntity itementity : this.level().getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(vec.x(), vec.y(), vec.z()))) {
                 if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && this.wantsToPickUp(itementity.getItem())) {
                     this.setItemSlot(EquipmentSlot.MAINHAND, itementity.getItem());
 

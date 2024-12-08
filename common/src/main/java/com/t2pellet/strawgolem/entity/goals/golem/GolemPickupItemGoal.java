@@ -12,7 +12,7 @@ import java.util.List;
 
 public class GolemPickupItemGoal extends MoveToBlockGoal {
     private StrawGolem golem;
-    double range = StrawgolemConfig.Harvesting.harvestRange.get();
+    private double range = StrawgolemConfig.Harvesting.harvestRange.get() / 2.0D;
 
     public GolemPickupItemGoal(StrawGolem golem) {
         super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get());
@@ -47,7 +47,7 @@ public class GolemPickupItemGoal extends MoveToBlockGoal {
         }
     }
 
-    public ItemEntity getOldestTarget(List<ItemEntity> entities) {
+    public static ItemEntity getOldestTarget(List<ItemEntity> entities) {
         if (entities.isEmpty()) {
             return null;
         }
