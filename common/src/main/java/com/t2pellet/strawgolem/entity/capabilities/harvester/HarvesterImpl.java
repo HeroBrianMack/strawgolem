@@ -1,5 +1,7 @@
 package com.t2pellet.strawgolem.entity.capabilities.harvester;
 
+import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.MapCodec;
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.util.VisibilityUtil;
 import com.t2pellet.strawgolem.util.crop.CropUtil;
@@ -20,6 +22,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -133,8 +137,14 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
             BlockState defaultState = state.getBlock() instanceof StemGrownBlock ? Blocks.AIR.defaultBlockState() : state.getBlock().defaultBlockState();
             entity.setItemSlot(EquipmentSlot.MAINHAND, pickupLoot(state));
             // Break block
+            HashSet<Property<?>> values;
+            if (state.hasProperty(BooleanProperty.create("ropelogged")) && state.getValue(BooleanProperty.create(("ropelogged"))))  {
+                defaultState = defaultState.setValue(BooleanProperty.create("ropelogged"), true);
+
+            }
             entity.level().destroyBlock(currentHarvestPos, false, entity);
             entity.level().setBlockAndUpdate(currentHarvestPos, defaultState);
+
             entity.level().gameEvent(defaultState.isAir() ? GameEvent.BLOCK_DESTROY : GameEvent.BLOCK_PLACE, currentHarvestPos, GameEvent.Context.of(entity, defaultState));
             // Update state and sync
             currentHarvestPos = null;
