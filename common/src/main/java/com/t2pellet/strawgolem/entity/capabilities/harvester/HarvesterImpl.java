@@ -136,25 +136,22 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
     private void harvestBlock() {
         if (!entity.level().isClientSide && isHarvesting() && CropUtil.isGrownCrop(entity.level(), currentHarvestPos)) {
             BlockState state = entity.level().getBlockState(currentHarvestPos);
-            BlockState defaultState = state.getBlock() instanceof StemGrownBlock ? Blocks.AIR.defaultBlockState() : state.getBlock().defaultBlockState();
+            BlockState newState = state.getBlock() instanceof StemGrownBlock ? Blocks.AIR.defaultBlockState() : state.getBlock().defaultBlockState();
+            BlockState defaultState = state.getBlock().defaultBlockState();
             entity.setItemSlot(EquipmentSlot.MAINHAND, pickupLoot(state));
-            // Break block
-            HashSet<Property<?>> values;
-            if (state.hasProperty(BooleanProperty.create("ropelogged")) && state.getValue(BooleanProperty.create(("ropelogged"))))  {
-                defaultState = defaultState.setValue(BooleanProperty.create("ropelogged"), true);
-            }
-            defaultState = state;
-            for (Property<?> prop : state.getBlock().defaultBlockState().getProperties()) {
-                if (prop instanceof IntegerProperty intProp && prop.getName().equals("age")) {
-//                    System.out.println(state.getBlock().defaultBlockState().getValue(intProp));
-                    defaultState = defaultState.setValue(intProp, state.getBlock().defaultBlockState().getValue(intProp));
+            if (!(state.getBlock() instanceof StemGrownBlock)) {
+                // Break block
+                newState = state;
+                for (Property<?> prop : defaultState.getProperties()) {
+                    if (prop instanceof IntegerProperty intProp && prop.getName().equals("age")) {
+                        newState = newState.setValue(intProp, defaultState.getValue(intProp));
+                    }
                 }
             }
-            if (state.hasProperty(BlockStateProperties.AGE_3))
             entity.level().destroyBlock(currentHarvestPos, false, entity);
-            entity.level().setBlockAndUpdate(currentHarvestPos, defaultState);
+            entity.level().setBlockAndUpdate(currentHarvestPos, newState);
 
-            entity.level().gameEvent(defaultState.isAir() ? GameEvent.BLOCK_DESTROY : GameEvent.BLOCK_PLACE, currentHarvestPos, GameEvent.Context.of(entity, defaultState));
+            entity.level().gameEvent(newState.isAir() ? GameEvent.BLOCK_DESTROY : GameEvent.BLOCK_PLACE, currentHarvestPos, GameEvent.Context.of(entity, newState));
             // Update state and sync
             currentHarvestPos = null;
             synchronize();
