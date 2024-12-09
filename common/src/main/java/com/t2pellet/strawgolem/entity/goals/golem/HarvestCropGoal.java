@@ -11,6 +11,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
@@ -55,7 +56,14 @@ public class HarvestCropGoal extends MoveToBlockGoal {
     @Override
     public void tick() {
         BlockPos targetPos = this.getMoveToTarget();
-        if (blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
+        BlockPos below = targetPos.below().below();
+        Block belowBlock = golem.level().getBlockState(below).getBlock();
+        while (!blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance()) &&
+                belowBlock.equals(golem.level().getBlockState(targetPos.below()).getBlock()) && CropUtil.isGrownCrop(golem.level(), targetPos.below())) {
+            below = below.below();
+            belowBlock = golem.level().getBlockState(below).getBlock();
+        }
+        if (below.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
             Harvester harvester = golem.getHarvester();
             golem.getNavigation().stop();
             if (harvester.isHarvestingBlock()) {
