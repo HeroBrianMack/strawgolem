@@ -22,7 +22,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -140,8 +142,15 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
             HashSet<Property<?>> values;
             if (state.hasProperty(BooleanProperty.create("ropelogged")) && state.getValue(BooleanProperty.create(("ropelogged"))))  {
                 defaultState = defaultState.setValue(BooleanProperty.create("ropelogged"), true);
-
             }
+            defaultState = state;
+            for (Property<?> prop : state.getBlock().defaultBlockState().getProperties()) {
+                if (prop instanceof IntegerProperty intProp && prop.getName().equals("age")) {
+//                    System.out.println(state.getBlock().defaultBlockState().getValue(intProp));
+                    defaultState = defaultState.setValue(intProp, state.getBlock().defaultBlockState().getValue(intProp));
+                }
+            }
+            if (state.hasProperty(BlockStateProperties.AGE_3))
             entity.level().destroyBlock(currentHarvestPos, false, entity);
             entity.level().setBlockAndUpdate(currentHarvestPos, defaultState);
 
