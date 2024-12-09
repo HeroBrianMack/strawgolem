@@ -140,7 +140,6 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
             BlockState defaultState = state.getBlock().defaultBlockState();
             entity.setItemSlot(EquipmentSlot.MAINHAND, pickupLoot(state));
             if (!(state.getBlock() instanceof StemGrownBlock)) {
-                // Break block
                 newState = state;
                 for (Property<?> prop : defaultState.getProperties()) {
                     if (prop instanceof IntegerProperty intProp && prop.getName().equals("age")) {
@@ -148,6 +147,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
                     }
                 }
             }
+            // Break block
             entity.level().destroyBlock(currentHarvestPos, false, entity);
             entity.level().setBlockAndUpdate(currentHarvestPos, newState);
 
