@@ -139,12 +139,19 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
             BlockState newState = state.getBlock() instanceof StemGrownBlock ? Blocks.AIR.defaultBlockState() : state.getBlock().defaultBlockState();
             BlockState defaultState = state.getBlock().defaultBlockState();
             entity.setItemSlot(EquipmentSlot.MAINHAND, pickupLoot(state));
-            if (!(state.getBlock() instanceof StemGrownBlock)) {
+            // Experimental Version: Resets the age back to default, maintains all other properties
+            if (!(state.getBlock() instanceof StemGrownBlock) && StrawgolemConfig.Experimental.experimentalHarvesting.get()) {
                 newState = state;
                 for (Property<?> prop : defaultState.getProperties()) {
                     if (prop instanceof IntegerProperty intProp && prop.getName().equals("age")) {
                         newState = newState.setValue(intProp, defaultState.getValue(intProp));
                     }
+                }
+            } else if (!(state.getBlock() instanceof StemGrownBlock)){ // Hard coded, but can guaranteed solve problems if aware of them.
+                newState = defaultState;
+                // Overly coded, will modify for future issues or scrap if experimental works
+                if (state.hasProperty(BooleanProperty.create("ropelogged"))) {
+                    newState = newState.setValue(BooleanProperty.create("ropelogged"), state.getValue(BooleanProperty.create("ropelogged")));
                 }
             }
             // Break block
