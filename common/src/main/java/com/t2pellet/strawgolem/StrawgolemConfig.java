@@ -116,6 +116,11 @@ public class StrawgolemConfig extends Config {
         public static final IntProperty starvingGolemFoodChance = new IntProperty(160, 1, 2000);
     }
 
+    @Section(name = "Experimental", description = "Experimental settings that may improve the golems")
+    public static class Experimental {
+        @Entry(comment = "Whether the golem should use an experimental harvesting method")
+        public static final BoolProperty experimentalHarvesting = new BoolProperty(false);
+    }
     private static ListProperty<String> createBlockIDList() {
         return ListProperty.of(new ArrayList<>(), (s) -> {
             return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.BLOCK.containsKey(new ResourceLocation(s));
