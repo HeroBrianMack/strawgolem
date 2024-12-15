@@ -56,13 +56,18 @@ public class HarvestCropGoal extends MoveToBlockGoal {
     @Override
     public void tick() {
         BlockPos targetPos = this.getMoveToTarget();
-        BlockPos below = targetPos.below().below();
-        Block belowBlock = golem.level().getBlockState(below).getBlock();
-        while (!blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance()) &&
-                belowBlock.equals(golem.level().getBlockState(targetPos.below()).getBlock()) && CropUtil.isGrownCrop(golem.level(), targetPos.below())) {
-            below = below.below();
-            belowBlock = golem.level().getBlockState(below).getBlock();
+        // Default below being at actual targetPos.
+        BlockPos below = targetPos.below();
+        if (StrawgolemConfig.Harvesting.enableVineHarvest.get()) {
+            below = targetPos.below().below();
+            Block belowBlock = golem.level().getBlockState(below).getBlock();
+            while (!blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance()) &&
+                    belowBlock.equals(golem.level().getBlockState(targetPos.below()).getBlock()) && CropUtil.isGrownCrop(golem.level(), targetPos.below())) {
+                below = below.below();
+                belowBlock = golem.level().getBlockState(below).getBlock();
+            }
         }
+
         if (below.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
             Harvester harvester = golem.getHarvester();
             golem.getNavigation().stop();

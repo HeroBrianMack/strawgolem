@@ -32,6 +32,8 @@ public class StrawgolemConfig extends Config {
         public static final BoolProperty enableWhitelist = new BoolProperty(false);
         @Entry(comment = "Whitelisted crops. Only applies if enableWhitelist=true. Must use valid resource locations")
         public static final ListProperty<String>  whitelist = createBlockIDList();
+        @Entry(comment = "Whether to enable vine-harvesting (multi-block vertical crops, like tomatoes from Farmer's Delight)")
+        public static final BoolProperty enableVineHarvest = new BoolProperty(true);
     }
 
     @Section(name = "Lifespan", description = "Golem lifespan options")
