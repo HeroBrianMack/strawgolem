@@ -6,28 +6,17 @@ import com.t2pellet.strawgolem.entity.capabilities.deliverer.Deliverer;
 import com.t2pellet.strawgolem.registry.StrawgolemSounds;
 import com.t2pellet.strawgolem.util.container.ContainerUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.HashSet;
-import java.util.Set;
 
 
 public class DeliverCropGoal extends GolemMoveGoal<Deliverer> {
 
-//    private final StrawGolem golem;
-//    private final ServerLevel level;
-//    private Vec3 oldBlockPos = null;
-//    private boolean scrambled = false;
-    private Set<BlockPos> invalidLocations = new HashSet<>();
-
     public DeliverCropGoal(StrawGolem golem) {
         super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get(), golem, golem.getDeliverer());
-//        this.golem = golem;
-//        this.level = (ServerLevel) golem.level();
+
     }
 
     @Override
@@ -47,6 +36,7 @@ public class DeliverCropGoal extends GolemMoveGoal<Deliverer> {
 
     @Override
     public void tick() {
+        super.tick();
         tryTicks++;
         double recalcMod = 0.0D;
         BlockPos blockpos = this.getMoveToTarget();
@@ -54,11 +44,6 @@ public class DeliverCropGoal extends GolemMoveGoal<Deliverer> {
             golem.getNavigation().stop();
             golem.getDeliverer().deliver(blockPos);
         } else if (shouldRecalculatePath()) {
-
-    //                if (golem.getDeliverer().hasPriorityPos()) {
-    //                blockPos = golem.getDeliverer().getDeliverPos();
-    //                }
-//            blockpos = getMoveToTarget();
             if (!golemCollision()) {
                 this.mob.getNavigation().moveTo((double) ((float) blockpos.getX()) + recalcMod, (double) blockpos.getY() + recalcMod, (double) ((float) blockpos.getZ()) + recalcMod, this.speedModifier);
             }
@@ -87,9 +72,11 @@ public class DeliverCropGoal extends GolemMoveGoal<Deliverer> {
             this.blockPos = blockPos;
             return true;
         }
-        if (blockPos == null) {
-            System.out.println("no position!");
-        }
         return false;
+    }
+
+    @Override
+    protected void updateBlackList() {
+        blackList = golem.getDeliverer();
     }
 }

@@ -17,13 +17,10 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Optional;
 
 
-public class HarvestCropGoal extends GolemMoveGoal {
-
-//    private final StrawGolem golem;
+public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
 
     public HarvestCropGoal(StrawGolem golem) {
         super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get(), golem, golem.getHarvester());
-//        this.golem = golem;
     }
 
     @Override
@@ -55,6 +52,7 @@ public class HarvestCropGoal extends GolemMoveGoal {
 
     @Override
     public void tick() {
+        super.tick();
         BlockPos targetPos = this.getMoveToTarget();
         tryTicks++;
         // Default below being at actual targetPos.
@@ -88,7 +86,6 @@ public class HarvestCropGoal extends GolemMoveGoal {
                 if(!golemCollision()) {
                     this.mob.getNavigation().moveTo((double) ((float) targetPos.getX()), (double) targetPos.getY() + 1.0, (double) ((float) targetPos.getZ()), this.speedModifier);
                 }
-//                this.mob.getNavigation().moveTo((double)((float)targetPos.getX()) + 0.5D, (double)targetPos.getY() + 0.5D, (double)((float)targetPos.getZ()) + 0.5D, this.speedModifier);
             }
             if (!golem.getLookControl().isLookingAtTarget()) {
                 golem.getLookControl().setLookAt(Vec3.atCenterOf(blockPos));
@@ -111,11 +108,21 @@ public class HarvestCropGoal extends GolemMoveGoal {
 
     @Override
     protected boolean findNearestBlock() {
-        BlockPos blockPos = golem.getHarvester().getHarvesting().get();
-        if (isValidTarget(mob.level(), blockPos)) {
-            this.blockPos = blockPos;
-            return true;
+        if (!golem.getHarvester().isHarvesting()) {
+            golem.getHarvester().findHarvestables();
         }
+       if (golem.getHarvester().getHarvesting().isPresent()) {
+           BlockPos blockPos = golem.getHarvester().getHarvesting().get();
+           if (isValidTarget(mob.level(), blockPos)) {
+               this.blockPos = blockPos;
+               return true;
+           }
+       }
         return false;
+    }
+
+    @Override
+    protected void updateBlackList() {
+        blackList = golem.getHarvester();
     }
 }

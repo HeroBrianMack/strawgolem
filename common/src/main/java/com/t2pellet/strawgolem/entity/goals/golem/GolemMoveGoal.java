@@ -1,5 +1,6 @@
 package com.t2pellet.strawgolem.entity.goals.golem;
 
+import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.strawgolem.entity.capabilities.BlacklistCapability;
 import net.minecraft.core.Direction;
@@ -7,9 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.Vec3;
-
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -25,7 +24,7 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     public GolemMoveGoal(PathfinderMob mob, double speed, int range, StrawGolem golem, BlacklistCapability obj) {
         super(mob, speed, range);
         this.golem = golem;
-        blackList = (E) obj;
+        updateBlackList();
         this.level = (ServerLevel) golem.level();
     }
 
@@ -45,38 +44,31 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
         if (tryTicks % 40 != 0) {
             return false;
         }
-        System.out.println(oldBlockPos.distanceTo(golem.position()));
         if (oldBlockPos.distanceTo(golem.position()) == 0.0 && !golem.isFallFlying()) {
 
             oldBlockPos = golem.position();
             // If golem is stuck on a golem, make them shift slightly.
             if (golemCollision()) {
-                System.out.println("Scrambled!");
                 scramblePath(golem);
             } else { // Golem cannot path to target, find new target.
-                System.out.println("invalid path");
                 blackList.addInvalidPos(blockPos);
                 if (!findNearestBlock()) {
                     // Give up on new pathing something has gone seriously wrong with code
                     // or player didn't make the target accessible
-                    System.out.println("This shouldn't occur!");
                     blackList.clearInvalidPos();
                     if (findNearestBlock()) {
-                        System.out.println("retry!");
                         return true;
                     }
 //                    System.out.println(blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance()));
                     return false;
                 }
             }
-            System.out.println("valid path?");
 
             return true;
         } else if ((oldBlockPos.distanceTo(golem.position()) < 0.01)) {
             oldBlockPos = golem.position();
             // If golem is stuck on a golem, make them shift slightly.
             if (golemCollision()) {
-                System.out.println("Scrambled!");
                 scramblePath(golem);
             }
             return true;
@@ -116,6 +108,17 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     public void start() {
         super.start();
         oldBlockPos = golem.position();
+        if (!StrawgolemConfig.Harvesting.permanentIgnore.get()) {
+            updateBlackList();
+            blackList.clearInvalidPos();
+        }
     }
+
+    @Override
+    public void tick() {
+        updateBlackList();
+    }
+
+    protected abstract void updateBlackList();
 
 }

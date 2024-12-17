@@ -2,11 +2,8 @@ package com.t2pellet.strawgolem;
 
 import com.t2pellet.tlib.config.api.Config;
 import com.t2pellet.tlib.config.api.property.*;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +31,8 @@ public class StrawgolemConfig extends Config {
         public static final ListProperty<String>  whitelist = createBlockIDList();
         @Entry(comment = "Whether to enable vine-harvesting (multi-block vertical crops, like tomatoes from Farmer's Delight)")
         public static final BoolProperty enableVineHarvest = new BoolProperty(true);
+        @Entry(comment = "Whether golems should forever ignore crops or storages that are inaccessible after finishing a harvest (the golems will not try to reach them again even if possible)")
+        public static final BoolProperty permanentIgnore = new BoolProperty(false);
     }
 
     @Section(name = "Lifespan", description = "Golem lifespan options")
