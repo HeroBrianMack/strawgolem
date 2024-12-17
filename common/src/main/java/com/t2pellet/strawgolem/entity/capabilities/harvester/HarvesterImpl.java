@@ -1,7 +1,5 @@
 package com.t2pellet.strawgolem.entity.capabilities.harvester;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.serialization.MapCodec;
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.util.VisibilityUtil;
 import com.t2pellet.strawgolem.util.crop.CropUtil;
@@ -22,12 +20,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
@@ -37,6 +33,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
 
     private final Deque<BlockPos> harvestQueue = new ArrayDeque<>();
     private BlockPos currentHarvestPos = null;
+    private final Set<BlockPos> invalidPos = new HashSet<>();
 
     protected HarvesterImpl(E e) {
         super(e);
@@ -124,13 +121,29 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
                             entityPos.offset(-x, -y, -z),
                     };
                     for (BlockPos position : positions) {
-                        if (CropUtil.isGrownCrop(entity.level(), position) && VisibilityUtil.canSee((LivingEntity) entity, position)) {
+                        if (CropUtil.isGrownCrop(entity.level(), position) && VisibilityUtil.canSee((LivingEntity) entity, position) && !invalidPos.contains(position)) {
                             queueHarvest(position);
                         }
                     }
                 }
             }
         }
+    }
+
+    @Override
+    public void addInvalidPos(BlockPos pos) {
+        if (harvestQueue.remove(pos)) {
+            invalidPos.add(pos);
+        }
+        if (currentHarvestPos.equals(pos)) {
+            currentHarvestPos = null;
+            startHarvest();
+        }
+    }
+
+    @Override
+    public void clearInvalidPos() {
+        invalidPos.clear();
     }
 
     private void harvestBlock() {

@@ -17,13 +17,13 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Optional;
 
 
-public class HarvestCropGoal extends MoveToBlockGoal {
+public class HarvestCropGoal extends GolemMoveGoal {
 
-    private final StrawGolem golem;
+//    private final StrawGolem golem;
 
     public HarvestCropGoal(StrawGolem golem) {
-        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get());
-        this.golem = golem;
+        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get(), golem, golem.getHarvester());
+//        this.golem = golem;
     }
 
     @Override
@@ -56,6 +56,7 @@ public class HarvestCropGoal extends MoveToBlockGoal {
     @Override
     public void tick() {
         BlockPos targetPos = this.getMoveToTarget();
+        tryTicks++;
         // Default below being at actual targetPos.
         BlockPos below = targetPos.below();
         if (StrawgolemConfig.Harvesting.enableVineHarvest.get()) {
@@ -68,7 +69,7 @@ public class HarvestCropGoal extends MoveToBlockGoal {
             }
         }
 
-        if (below.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
+        if (targetPos.closerToCenterThan(this.mob.position(), this.acceptedDistance()) || below.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
             Harvester harvester = golem.getHarvester();
             golem.getNavigation().stop();
             if (harvester.isHarvestingBlock()) {
@@ -84,7 +85,10 @@ public class HarvestCropGoal extends MoveToBlockGoal {
             });
         } else {
             if (this.shouldRecalculatePath()) {
-                this.mob.getNavigation().moveTo((double)((float)targetPos.getX()) + 0.5D, (double)targetPos.getY() + 0.5D, (double)((float)targetPos.getZ()) + 0.5D, this.speedModifier);
+                if(!golemCollision()) {
+                    this.mob.getNavigation().moveTo((double) ((float) targetPos.getX()), (double) targetPos.getY() + 1.0, (double) ((float) targetPos.getZ()), this.speedModifier);
+                }
+//                this.mob.getNavigation().moveTo((double)((float)targetPos.getX()) + 0.5D, (double)targetPos.getY() + 0.5D, (double)((float)targetPos.getZ()) + 0.5D, this.speedModifier);
             }
             if (!golem.getLookControl().isLookingAtTarget()) {
                 golem.getLookControl().setLookAt(Vec3.atCenterOf(blockPos));
@@ -103,5 +107,15 @@ public class HarvestCropGoal extends MoveToBlockGoal {
     @Override
     public double acceptedDistance() {
         return 1.3D;
+    }
+
+    @Override
+    protected boolean findNearestBlock() {
+        BlockPos blockPos = golem.getHarvester().getHarvesting().get();
+        if (isValidTarget(mob.level(), blockPos)) {
+            this.blockPos = blockPos;
+            return true;
+        }
+        return false;
     }
 }

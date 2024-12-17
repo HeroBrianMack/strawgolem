@@ -103,7 +103,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
     }
 
     @Override
-    public void addInvalidDeliverPos(BlockPos pos) {
+    public void addInvalidPos(BlockPos pos) {
         if (containerSet.remove(pos)) {
             invalidContainers.add(pos);
         }
