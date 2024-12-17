@@ -69,7 +69,6 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
 
     private Optional<BlockPos> closestRememberedValidDeliverable() {
         if (hasPriorityPos() && canDeliverToPos(entity.level(), priorityContainer)) {
-            System.out.println("non-null");
             return Optional.of(priorityContainer);
         }
         return containerSet.stream()
