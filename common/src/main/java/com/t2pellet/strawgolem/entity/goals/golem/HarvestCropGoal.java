@@ -87,8 +87,8 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
                     if (!fail && !this.mob.getNavigation().moveTo((double) ((float) targetPos.getX()), (double) targetPos.getY() - 1.0, (double) ((float) targetPos.getZ()), this.speedModifier)) {
                         fail = true;
                     }
-                    if (fail) {
-                        failToReachGoal();
+                    if (fail && still() && (closeEnough(blockPos) || closeEnough(below))) {
+                        fail = failToReachGoal();
 //                        this.mob.getNavigation().moveTo((double) ((float) blockPos.getX()), (double) blockPos.getY() - 2.0, (double) ((float) blockPos.getZ()), this.speedModifier);
                     }
 
@@ -116,6 +116,9 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
         return 1.3D;
     }
 
+    private boolean closeEnough(BlockPos pos) {
+        return Math.abs(pos.getX() - golem.getX()) < 3.0 && Math.abs(pos.getY() - golem.getY()) < 1.5 && Math.abs(pos.getZ() - golem.getZ()) < 3.0;
+    }
 
     @Override
     protected boolean findNearestBlock() {

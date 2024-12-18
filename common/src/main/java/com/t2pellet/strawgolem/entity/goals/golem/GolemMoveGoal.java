@@ -54,7 +54,7 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
             if (golemCollision()) {
                 fail = false;
                 scramblePath(golem);
-            } /*else { // Golem cannot path to target, find new target.
+            } else if (fail) { // Golem cannot path to target, find new target.
                 fail = false;
                 blackList.addInvalidPos(blockPos);
                 if (!findNearestBlock()) {
@@ -65,19 +65,18 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
                         return true;
                     }
                     return false;
-                }*/
+                }
             }
 
-/*            return true;
-        } else if (delta() < 0.01) {
+            return true;
+        } else if (delta() < 0.05) {
             oldBlockPos = golem.position();
-            fail = false;
             // If golem is stuck on a golem, make them shift slightly.
             if (golemCollision()) {
                 scramblePath(golem);
             }
             return true;
-        }*/
+        }
         scrambled = false;
         oldBlockPos = golem.position();
         return true;
@@ -93,13 +92,13 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
             golemDirection = Direction.getRandom(RandomSource.create());
         }
         if (golemDirection == Direction.NORTH) {
-            z -= modifier;
-        } else if (golemDirection == Direction.SOUTH) {
-            z += modifier;
-        } else if (golemDirection == Direction.EAST) {
             x += modifier;
-        } else if (golemDirection == Direction.WEST) {
+        } else if (golemDirection == Direction.SOUTH) {
             x -= modifier;
+        } else if (golemDirection == Direction.EAST) {
+            z += modifier;
+        } else if (golemDirection == Direction.WEST) {
+            z -= modifier;
         }
         scrambled = true;
         golem.getNavigation().moveTo(x, y, z, speedModifier);
@@ -107,6 +106,10 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
 
     private double delta() {
         return oldBlockPos.distanceTo(golem.position());
+    }
+
+    protected boolean still() {
+        return delta() == 0.0;
     }
 
     public boolean failToReachGoal() {
@@ -127,8 +130,7 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
             } else if (golemDirection == Direction.WEST) {
                 x -= modifier;
             }
-            golem.getNavigation().moveTo(x, y, z, speedModifier);
-            return true;
+            return golem.getNavigation().moveTo(x, y, z, speedModifier);
         }
         return false;
     }
