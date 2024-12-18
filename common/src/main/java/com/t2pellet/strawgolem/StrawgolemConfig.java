@@ -37,7 +37,7 @@ public class StrawgolemConfig extends Config {
 
     @Section(name = "Lifespan", description = "Golem lifespan options")
     public static class Lifespan {
-        @Entry(comment = "Whether to enable lifespan/decay feature")
+        @Entry(comment = "Whether to enable lifespan/decay/hunger feature")
         public static final BoolProperty enabled = new BoolProperty(true);
         @Entry(comment = "Base health. Requires restart")
         public static final IntProperty baseHealth = new IntProperty(6, 1, 10);
