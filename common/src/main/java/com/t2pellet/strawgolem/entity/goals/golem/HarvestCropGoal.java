@@ -67,7 +67,7 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
             }
         }
 
-        if (targetPos.closerToCenterThan(this.mob.position(), this.acceptedDistance()) || below.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
+        if (withinDistance(targetPos) || withinDistance(below)) {
             Harvester harvester = golem.getHarvester();
             golem.getNavigation().stop();
             if (harvester.isHarvestingBlock()) {
@@ -84,7 +84,16 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
         } else {
             if (this.shouldRecalculatePath()) {
                 if(!golemCollision()) {
-                    this.mob.getNavigation().moveTo((double) ((float) targetPos.getX()), (double) targetPos.getY() + 1.0, (double) ((float) targetPos.getZ()), this.speedModifier);
+                    if (!fail && !this.mob.getNavigation().moveTo((double) ((float) targetPos.getX()), (double) targetPos.getY() - 1.0, (double) ((float) targetPos.getZ()), this.speedModifier)) {
+                        fail = true;
+                    }
+                    if (fail) {
+                        failToReachGoal();
+//                        this.mob.getNavigation().moveTo((double) ((float) blockPos.getX()), (double) blockPos.getY() - 2.0, (double) ((float) blockPos.getZ()), this.speedModifier);
+                    }
+
+
+//                    this.mob.getNavigation().moveTo((double) ((float) targetPos.getX()), (double) targetPos.getY() + 1.0, (double) ((float) targetPos.getZ()), this.speedModifier);
                 }
             }
             if (!golem.getLookControl().isLookingAtTarget()) {
@@ -96,6 +105,7 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
     @Override
     public void start() {
         super.start();
+        fail = false;
         golem.playSound(StrawgolemSounds.GOLEM_INTERESTED.get());
         // Update the tether to the crop we're harvesting
         golem.getTether().update(blockPos);
@@ -105,6 +115,7 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
     public double acceptedDistance() {
         return 1.3D;
     }
+
 
     @Override
     protected boolean findNearestBlock() {

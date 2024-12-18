@@ -3,6 +3,7 @@ package com.t2pellet.strawgolem.entity.goals.golem;
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.strawgolem.entity.capabilities.BlacklistCapability;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -19,6 +20,7 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     protected Vec3 oldBlockPos = null;
     protected boolean scrambled = false;
     protected E blackList;
+    protected boolean fail = false;
     public Predicate<StrawGolem> validGolem = this::validGolem;
 
     public GolemMoveGoal(PathfinderMob mob, double speed, int range, StrawGolem golem, BlacklistCapability obj) {
@@ -29,7 +31,7 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     }
 
     protected boolean golemCollision() {
-        List<StrawGolem> nearbyGolem = golem.level().getEntitiesOfClass(StrawGolem.class, golem.getBoundingBox().inflate(0.3), validGolem);
+        List<StrawGolem> nearbyGolem = golem.level().getEntitiesOfClass(StrawGolem.class, golem.getBoundingBox().inflate(0.4), validGolem);
         return !nearbyGolem.isEmpty();
     }
 
@@ -44,13 +46,16 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
         if (tryTicks % 40 != 0) {
             return false;
         }
-        if (oldBlockPos.distanceTo(golem.position()) == 0.0 && !golem.isFallFlying()) {
+        System.out.println(this.blockPos.below().distToCenterSqr(golem.position()) - (acceptedDistance() * acceptedDistance()));
+        if (delta() == 0.0 && !golem.isFallFlying()) {
 
             oldBlockPos = golem.position();
             // If golem is stuck on a golem, make them shift slightly.
             if (golemCollision()) {
+                fail = false;
                 scramblePath(golem);
-            } else { // Golem cannot path to target, find new target.
+            } /*else { // Golem cannot path to target, find new target.
+                fail = false;
                 blackList.addInvalidPos(blockPos);
                 if (!findNearestBlock()) {
                     // Give up on new pathing something has gone seriously wrong with code
@@ -59,20 +64,20 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
                     if (findNearestBlock()) {
                         return true;
                     }
-//                    System.out.println(blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance()));
                     return false;
-                }
+                }*/
             }
 
-            return true;
-        } else if ((oldBlockPos.distanceTo(golem.position()) < 0.01)) {
+/*            return true;
+        } else if (delta() < 0.01) {
             oldBlockPos = golem.position();
+            fail = false;
             // If golem is stuck on a golem, make them shift slightly.
             if (golemCollision()) {
                 scramblePath(golem);
             }
             return true;
-        }
+        }*/
         scrambled = false;
         oldBlockPos = golem.position();
         return true;
@@ -88,17 +93,44 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
             golemDirection = Direction.getRandom(RandomSource.create());
         }
         if (golemDirection == Direction.NORTH) {
-            x += modifier;
-        } else if (golemDirection == Direction.SOUTH) {
-            x -= modifier;
-        } else if (golemDirection == Direction.EAST) {
-            z += modifier;
-        } else if (golemDirection == Direction.WEST) {
             z -= modifier;
+        } else if (golemDirection == Direction.SOUTH) {
+            z += modifier;
+        } else if (golemDirection == Direction.EAST) {
+            x += modifier;
+        } else if (golemDirection == Direction.WEST) {
+            x -= modifier;
         }
         scrambled = true;
-        System.out.println(x + " " + y + " " + z);
         golem.getNavigation().moveTo(x, y, z, speedModifier);
+    }
+
+    private double delta() {
+        return oldBlockPos.distanceTo(golem.position());
+    }
+
+    public boolean failToReachGoal() {
+        if (true) {
+            fail = true;
+            System.out.println("fail");
+            double x = blockPos.getX();
+            double y = blockPos.getY();
+            double z = blockPos.getZ();
+            double modifier = 2.0;
+            Direction golemDirection = golem.getDirection();
+            if (golemDirection == Direction.NORTH) {
+                z -= modifier;
+            } else if (golemDirection == Direction.SOUTH) {
+                z += modifier;
+            } else if (golemDirection == Direction.EAST) {
+                x += modifier;
+            } else if (golemDirection == Direction.WEST) {
+                x -= modifier;
+            }
+            golem.getNavigation().moveTo(x, y, z, speedModifier);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -107,6 +139,7 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     @Override
     public void start() {
         super.start();
+        System.out.println(getMoveToTarget());
         oldBlockPos = golem.position();
         if (!StrawgolemConfig.Harvesting.permanentIgnore.get()) {
             updateBlackList();
@@ -119,6 +152,15 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
         updateBlackList();
     }
 
+    protected boolean withinDistance(BlockPos targetPos, double distance) {
+        return targetPos.closerToCenterThan(mob.position(), distance);
+    }
+
+    protected boolean withinDistance(BlockPos targetPos) {
+        return withinDistance(targetPos, acceptedDistance());
+    }
+
+    public abstract double acceptedDistance();
     protected abstract void updateBlackList();
 
 }
