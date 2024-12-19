@@ -112,25 +112,21 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     }
 
     public boolean failToReachGoal() {
-        if (true) {
-            fail = true;
-            double x = blockPos.getX();
-            double y = blockPos.getY();
-            double z = blockPos.getZ();
-            double modifier = 2.0;
-            Direction golemDirection = golem.getDirection();
-            if (golemDirection == Direction.NORTH) {
-                z -= modifier;
-            } else if (golemDirection == Direction.SOUTH) {
-                z += modifier;
-            } else if (golemDirection == Direction.EAST) {
-                x += modifier;
-            } else if (golemDirection == Direction.WEST) {
-                x -= modifier;
-            }
-            return golem.getNavigation().moveTo(x, y, z, speedModifier);
+        double x = blockPos.getX();
+        double y = blockPos.getY();
+        double z = blockPos.getZ();
+        double modifier = 2.0;
+        Direction golemDirection = golem.getDirection();
+        if (golemDirection == Direction.NORTH) {
+            z -= modifier;
+        } else if (golemDirection == Direction.SOUTH) {
+            z += modifier;
+        } else if (golemDirection == Direction.EAST) {
+            x += modifier;
+        } else if (golemDirection == Direction.WEST) {
+            x -= modifier;
         }
-        return false;
+        return golem.getNavigation().moveTo(x, y, z, speedModifier);
     }
 
     @Override

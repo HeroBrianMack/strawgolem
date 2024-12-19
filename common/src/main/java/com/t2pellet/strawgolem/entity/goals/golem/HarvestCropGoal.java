@@ -88,7 +88,7 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
                         fail = true;
                     }
                     if (fail && still() && (closeEnough(blockPos) || closeEnough(below))) {
-                        fail = failToReachGoal();
+                        failToReachGoal();
                     }
                 }
             }
