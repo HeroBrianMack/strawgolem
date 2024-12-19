@@ -2,26 +2,21 @@ package com.t2pellet.strawgolem.entity.goals.golem;
 
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
-import com.t2pellet.strawgolem.entity.capabilities.hunger.HungerState;
+import com.t2pellet.strawgolem.entity.capabilities.deliverer.Deliverer;
 import com.t2pellet.strawgolem.registry.StrawgolemSounds;
 import com.t2pellet.strawgolem.util.container.ContainerUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.Vec3;
 
 
-public class DeliverCropGoal extends MoveToBlockGoal {
 
-    private final StrawGolem golem;
-    private final ServerLevel level;
+public class DeliverCropGoal extends GolemMoveGoal<Deliverer> {
 
     public DeliverCropGoal(StrawGolem golem) {
-        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get());
-        this.golem = golem;
-        this.level = (ServerLevel) golem.level();
+        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get(), golem, golem.getDeliverer());
+
     }
 
     @Override
@@ -41,13 +36,22 @@ public class DeliverCropGoal extends MoveToBlockGoal {
 
     @Override
     public void tick() {
+        super.tick();
+        tryTicks++;
         BlockPos blockpos = this.getMoveToTarget();
         if (blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
             golem.getNavigation().stop();
             golem.getDeliverer().deliver(blockPos);
         } else {
             if (this.shouldRecalculatePath()) {
-                this.mob.getNavigation().moveTo((double)((float)blockpos.getX()) + 0.5D, (double)blockpos.getY() + 0.5D, (double)((float)blockpos.getZ()) + 0.5D, this.speedModifier);
+                if(!golemCollision()) {
+                    if (!fail && !this.mob.getNavigation().moveTo((double) ((float) blockpos.getX()), (double) blockpos.getY(), (double) ((float) blockpos.getZ()), this.speedModifier)) {
+                        fail = true;
+                    }
+                    if (fail && still() && (closeEnough(blockpos))) {
+                        fail = failToReachGoal();
+                    }
+                }
             }
             if (!golem.getLookControl().isLookingAtTarget()) {
                 golem.getLookControl().setLookAt(Vec3.atCenterOf(blockPos));
@@ -75,5 +79,10 @@ public class DeliverCropGoal extends MoveToBlockGoal {
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected void updateBlackList() {
+        blackList = golem.getDeliverer();
     }
 }

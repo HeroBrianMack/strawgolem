@@ -26,6 +26,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
     private final Set<BlockPos> containerSet = new HashSet<>();
     private BlockPos priorityContainer;
     private ResourceLocation level;
+    private final Set<BlockPos> invalidContainers = new HashSet<>();
 
     protected DelivererImpl(E e) {
         super(e);
@@ -55,6 +56,11 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         }
     }
 
+    @Override
+    public boolean hasPriorityPos() {
+        return priorityContainer != null;
+    }
+
     private void clearData() {
         containerSet.clear();
         priorityContainer = null;
@@ -62,7 +68,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
     }
 
     private Optional<BlockPos> closestRememberedValidDeliverable() {
-        if (priorityContainer != null && canDeliverToPos(entity.level(), priorityContainer)) {
+        if (hasPriorityPos() && canDeliverToPos(entity.level(), priorityContainer)) {
             return Optional.of(priorityContainer);
         }
         return containerSet.stream()
@@ -72,7 +78,10 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
 
     private boolean canDeliverToPos(LevelAccessor level, BlockPos pos) {
         ItemStack deliveringStack = entity.getMainHandItem();
-        return VisibilityUtil.canSee(entity, pos) && ContainerUtil.isContainer(level, pos) && !ContainerUtil.findSlotsInContainer(level, pos, deliveringStack).isEmpty();
+
+        return VisibilityUtil.canSee(entity, pos) && ContainerUtil.isContainer(level, pos)
+                && !ContainerUtil.findSlotsInContainer(level, pos, deliveringStack).isEmpty()
+                && !invalidContainers.contains(pos);
     }
 
     private BlockPos scanForDeliverable(BlockPos query) {
@@ -80,7 +89,9 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
             for (int y = -12; y <= 12; ++y) {
                 for (int z = -24; z <= 24; ++z) {
                     BlockPos pos = query.offset(x, y, z);
-                    if (ContainerUtil.isContainer(entity.level(), pos) && VisibilityUtil.canSee(entity, pos)) {
+                    if (ContainerUtil.isContainer(entity.level(), pos)
+                            && VisibilityUtil.canSee(entity, pos)
+                            && !invalidContainers.contains(pos)) {
                         containerSet.add(pos);
                         return pos;
                     }
@@ -88,6 +99,18 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
             }
         }
         return null;
+    }
+
+    @Override
+    public void addInvalidPos(BlockPos pos) {
+        if (containerSet.remove(pos)) {
+            invalidContainers.add(pos);
+        }
+    }
+
+    @Override
+    public void clearInvalidPos() {
+        invalidContainers.clear();
     }
 
     @Override
@@ -115,7 +138,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
     @Override
     public Tag writeTag() {
         CompoundTag deliverTag = new CompoundTag();
-        if (priorityContainer != null) {
+        if (hasPriorityPos()) {
             deliverTag.put("priority", NbtUtils.writeBlockPos(priorityContainer));
         }
         ListTag positionsTag = new ListTag();

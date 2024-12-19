@@ -2,11 +2,8 @@ package com.t2pellet.strawgolem;
 
 import com.t2pellet.tlib.config.api.Config;
 import com.t2pellet.tlib.config.api.property.*;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,11 +29,15 @@ public class StrawgolemConfig extends Config {
         public static final BoolProperty enableWhitelist = new BoolProperty(false);
         @Entry(comment = "Whitelisted crops. Only applies if enableWhitelist=true. Must use valid resource locations")
         public static final ListProperty<String>  whitelist = createBlockIDList();
+        @Entry(comment = "Whether to enable vine-harvesting (multi-block vertical crops, like tomatoes from Farmer's Delight)")
+        public static final BoolProperty enableVineHarvest = new BoolProperty(true);
+        @Entry(comment = "Whether golems should forever ignore crops or storages that are inaccessible after finishing a harvest (the golems will not try to reach them again even if possible)")
+        public static final BoolProperty permanentIgnore = new BoolProperty(false);
     }
 
     @Section(name = "Lifespan", description = "Golem lifespan options")
     public static class Lifespan {
-        @Entry(comment = "Whether to enable lifespan/decay feature")
+        @Entry(comment = "Whether to enable lifespan/decay/hunger feature")
         public static final BoolProperty enabled = new BoolProperty(true);
         @Entry(comment = "Base health. Requires restart")
         public static final IntProperty baseHealth = new IntProperty(6, 1, 10);
@@ -63,7 +64,7 @@ public class StrawgolemConfig extends Config {
         @Entry(comment = "Durability for barrels equipped to a straw golem")
         public static final IntProperty barrelDurability = new IntProperty(100, 1, 1000);
         @Entry(comment = "Item to repair barrels with. (Requires restart)")
-        public static final StringProperty barrelItem = new StringProperty("minecraft:planks", s -> {
+        public static final StringProperty barrelItem = new StringProperty("planks", s -> {
             return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
         });
         @Entry(comment = "How much durability to restore from barrelItem. Set to zero to disable")
@@ -114,6 +115,11 @@ public class StrawgolemConfig extends Config {
         public static final IntProperty starvingGolemFoodChance = new IntProperty(160, 1, 2000);
     }
 
+    @Section(name = "Experimental", description = "Experimental settings that may improve the golems")
+    public static class Experimental {
+        @Entry(comment = "Whether the golem should use an experimental harvesting method")
+        public static final BoolProperty experimentalHarvesting = new BoolProperty(false);
+    }
     private static ListProperty<String> createBlockIDList() {
         return ListProperty.of(new ArrayList<>(), (s) -> {
             return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.BLOCK.containsKey(new ResourceLocation(s));

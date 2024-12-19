@@ -23,6 +23,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -31,6 +32,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -76,7 +78,11 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     public static final Item REPAIR_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
     public static final Item FEED_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.feedItem.get()));
 
-    public static final Item BARREL_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.barrelItem.get()));
+//    public static final Item BARREL_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.barrelItem.get()));
+public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, new ResourceLocation(StrawgolemConfig.Lifespan.barrelItem.get()));
+
+//public static CompoundTag = new TagParser(new StringReader("minecraft:planks")));
+
     private static final double WALK_DISTANCE = 0.00000001D;
     private static final double RUN_DISTANCE = 0.003D;
 
@@ -237,6 +243,9 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
 
     @Override
     protected @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand) {
+        if (level().isClientSide) {
+            return InteractionResult.PASS;
+        }
         ItemStack item = player.getItemInHand(hand);
         if (item.getItem() == REPAIR_ITEM && decay.getState() != DecayState.NEW) {
             boolean success = decay.repair();
@@ -262,7 +271,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
             entityData.set(BARREL_HEALTH, StrawgolemConfig.Lifespan.barrelDurability.get());
             item.shrink(1);
             return InteractionResult.SUCCESS;
-        } else if (item.getItem() == BARREL_ITEM && hasBarrel()) {
+        } else if (item.is(BARREL_ITEM) && hasBarrel()) {
             boolean success = repairBarrel();
             if (success) {
                 item.shrink(1);
@@ -569,7 +578,5 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
         double z = random.nextFloat() + pos.z - 0.5F;
         level().addParticle(ParticleTypes.HAPPY_VILLAGER, x, pos.y + 0.85F, z, movement.x, movement.y, movement.z);
     }
-
-
 
 }
