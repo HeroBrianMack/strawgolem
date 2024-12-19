@@ -53,6 +53,12 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
     @Override
     public void tick() {
         super.tick();
+        if (!isValidTarget(this.mob.level(), this.blockPos) && blockPos != null) {
+            blackList.addInvalidPos(blockPos);
+            if (!findNearestBlock()) {
+                return;
+            }
+        }
         BlockPos targetPos = this.getMoveToTarget();
         tryTicks++;
         // Default below being at actual targetPos.

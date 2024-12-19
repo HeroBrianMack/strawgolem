@@ -135,7 +135,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
         if (harvestQueue.remove(pos)) {
             invalidPos.add(pos);
         }
-        if (currentHarvestPos.equals(pos)) {
+        if (currentHarvestPos == null || currentHarvestPos.equals(pos)) {
             currentHarvestPos = null;
             startHarvest();
         }
