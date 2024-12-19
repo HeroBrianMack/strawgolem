@@ -230,11 +230,9 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     @Override
     protected @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand) {
         if (level().isClientSide) {
-            System.out.println("CLIENT");
             return InteractionResult.PASS;
         }
         ItemStack item = player.getItemInHand(hand);
-        System.out.println(BARREL_ITEM);
         if (item.getItem() == REPAIR_ITEM && decay.getState() != DecayState.NEW) {
             boolean success = decay.repair();
             if (success) {
@@ -266,7 +264,6 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
                 playSound(SoundEvents.ARMOR_EQUIP_LEATHER);
             }
         } else if (hand == InteractionHand.MAIN_HAND && item.isEmpty() && player.isCrouching()) {
-            System.out.println("ORDER");
             StrawGolemOrderer orderer = (StrawGolemOrderer) (Object) player;
             if (orderer.getOrderedGolem().isPresent() && orderer.getOrderedGolem().get().getId() == getId()) {
                 player.displayClientMessage(Component.translatable("strawgolem.ordering.stop"), true);

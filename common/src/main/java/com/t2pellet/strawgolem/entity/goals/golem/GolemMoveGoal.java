@@ -46,7 +46,6 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
         if (tryTicks % 40 != 0) {
             return false;
         }
-        System.out.println(this.blockPos.below().distToCenterSqr(golem.position()) - (acceptedDistance() * acceptedDistance()));
         if (delta() == 0.0 && !golem.isFallFlying()) {
 
             oldBlockPos = golem.position();
@@ -115,7 +114,6 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     public boolean failToReachGoal() {
         if (true) {
             fail = true;
-            System.out.println("fail");
             double x = blockPos.getX();
             double y = blockPos.getY();
             double z = blockPos.getZ();
@@ -141,7 +139,6 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     @Override
     public void start() {
         super.start();
-        System.out.println(getMoveToTarget());
         oldBlockPos = golem.position();
         if (!StrawgolemConfig.Harvesting.permanentIgnore.get()) {
             updateBlackList();
@@ -156,6 +153,11 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
 
     protected boolean withinDistance(BlockPos targetPos, double distance) {
         return targetPos.closerToCenterThan(mob.position(), distance);
+    }
+
+    // This method just makes sure the golem is actually close enough before trying a fail
+    protected boolean closeEnough(BlockPos pos) {
+        return Math.abs(pos.getX() - golem.getX()) < 3.0 && Math.abs(pos.getY() - golem.getY()) < 1.5 && Math.abs(pos.getZ() - golem.getZ()) < 3.0;
     }
 
     protected boolean withinDistance(BlockPos targetPos) {

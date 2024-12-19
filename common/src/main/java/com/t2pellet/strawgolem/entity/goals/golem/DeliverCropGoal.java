@@ -38,14 +38,20 @@ public class DeliverCropGoal extends GolemMoveGoal<Deliverer> {
     public void tick() {
         super.tick();
         tryTicks++;
-        double recalcMod = 0.0D;
         BlockPos blockpos = this.getMoveToTarget();
         if (blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
             golem.getNavigation().stop();
             golem.getDeliverer().deliver(blockPos);
-        } else if (shouldRecalculatePath()) {
-            if (!golemCollision()) {
-                this.mob.getNavigation().moveTo((double) ((float) blockpos.getX()) + recalcMod, (double) blockpos.getY() + recalcMod, (double) ((float) blockpos.getZ()) + recalcMod, this.speedModifier);
+        } else {
+            if (this.shouldRecalculatePath()) {
+                if(!golemCollision()) {
+                    if (!fail && !this.mob.getNavigation().moveTo((double) ((float) blockpos.getX()), (double) blockpos.getY(), (double) ((float) blockpos.getZ()), this.speedModifier)) {
+                        fail = true;
+                    }
+                    if (fail && still() && (closeEnough(blockpos))) {
+                        fail = failToReachGoal();
+                    }
+                }
             }
             if (!golem.getLookControl().isLookingAtTarget()) {
                 golem.getLookControl().setLookAt(Vec3.atCenterOf(blockPos));
