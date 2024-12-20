@@ -24,7 +24,7 @@ public class GolemPickupItemGoal extends GolemMoveGoal {
     @Override
     public boolean canUse() {
         List<ItemEntity> nearbyItems = golem.level().getEntitiesOfClass(ItemEntity.class, golem.getBoundingBox().inflate(range, range, range), golem.validGolemItems);
-        return !nearbyItems.isEmpty() && golem.getHeldItem().get().isEmpty();
+        return getOldestTarget(nearbyItems) != null && golem.getHeldItem().get().isEmpty();
 
 
     }
@@ -53,7 +53,7 @@ public class GolemPickupItemGoal extends GolemMoveGoal {
         if (shouldRecalculatePath()) {
             System.out.println("recalc");
             System.out.println(blacklist);
-            if (!fail && !nearbyItems.isEmpty()) {
+            if (!fail && oldest != null) {
                 blockPos = oldest.blockPosition();
                 System.out.println(oldest.blockPosition());
                 fail = !golem.getNavigation().moveTo(oldest, getSpeed());
@@ -62,7 +62,7 @@ public class GolemPickupItemGoal extends GolemMoveGoal {
                     golem.getLookControl().setLookAt(Vec3.atCenterOf(blockPos));
                 }
             }
-            if (fail && !nearbyItems.isEmpty() && closeEnough(oldest.getOnPos())) {
+            if (fail && oldest != null && closeEnough(oldest.getOnPos())) {
                 System.out.println("fail");
                 failToReachGoal();
             }
