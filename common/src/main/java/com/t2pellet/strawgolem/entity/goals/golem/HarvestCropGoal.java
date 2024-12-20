@@ -20,7 +20,7 @@ import java.util.Optional;
 public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
 
     public HarvestCropGoal(StrawGolem golem) {
-        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get(), golem, golem.getHarvester());
+        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get(), golem);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
     public void tick() {
         super.tick();
         if (!isValidTarget(this.mob.level(), this.blockPos) && blockPos != null) {
-            blackList.addInvalidPos(blockPos);
+            blackListAdd(blockPos);
             if (!findNearestBlock()) {
                 return;
             }
@@ -135,8 +135,14 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
         return false;
     }
 
+
     @Override
-    protected void updateBlackList() {
-        blackList = golem.getHarvester();
+    protected void blackListAdd(BlockPos blockPos) {
+        golem.getHarvester().addInvalidPos(blockPos);
+    }
+
+    @Override
+    protected void blackListClear() {
+        golem.getHarvester().clearInvalidPos();
     }
 }

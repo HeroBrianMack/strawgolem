@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 public class DeliverCropGoal extends GolemMoveGoal<Deliverer> {
 
     public DeliverCropGoal(StrawGolem golem) {
-        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get(), golem, golem.getDeliverer());
+        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get(), golem);
 
     }
 
@@ -82,7 +82,13 @@ public class DeliverCropGoal extends GolemMoveGoal<Deliverer> {
     }
 
     @Override
-    protected void updateBlackList() {
-        blackList = golem.getDeliverer();
+    protected void blackListAdd(BlockPos blockPos) {
+        golem.getDeliverer().addInvalidPos(blockPos);
     }
+
+    @Override
+    protected void blackListClear() {
+        golem.getDeliverer().clearInvalidPos();
+    }
+
 }

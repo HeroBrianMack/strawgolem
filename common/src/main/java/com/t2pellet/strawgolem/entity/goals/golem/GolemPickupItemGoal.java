@@ -7,16 +7,18 @@ import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
-public class GolemPickupItemGoal extends MoveToBlockGoal {
-    private StrawGolem golem;
+public class GolemPickupItemGoal extends GolemMoveGoal {
     private double range = StrawgolemConfig.Harvesting.harvestRange.get() / 2.0D;
+    private Set<BlockPos> blacklist = new HashSet<>();
 
     public GolemPickupItemGoal(StrawGolem golem) {
-        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get());
-        this.golem = golem;
+        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get(), golem);
     }
 
     @Override
@@ -26,9 +28,17 @@ public class GolemPickupItemGoal extends MoveToBlockGoal {
 
 
     }
+
+    @Override
+    protected boolean findNearestBlock() {
+        return !golem.level().getEntitiesOfClass(ItemEntity.class, golem.getBoundingBox().inflate(range, range, range), golem.validGolemItems).isEmpty();
+    }
+
     @Override
     public void start() {
         List<ItemEntity> nearbyItems = golem.level().getEntitiesOfClass(ItemEntity.class, golem.getBoundingBox().inflate(range, range, range), golem.validGolemItems);
+        super.start();
+        fail = false;
         if (!nearbyItems.isEmpty()) {
             golem.getNavigation().moveTo(nearbyItems.get(0), getSpeed());
         }
@@ -39,25 +49,46 @@ public class GolemPickupItemGoal extends MoveToBlockGoal {
     public void tick() {
         List<ItemEntity> nearbyItems = golem.level().getEntitiesOfClass(ItemEntity.class, golem.getBoundingBox().inflate(range, range, range), golem.validGolemItems);
         ItemEntity oldest = getOldestTarget(nearbyItems);
-        if (!nearbyItems.isEmpty()) {
-            golem.getNavigation().moveTo(oldest, getSpeed());
-            if (!golem.getLookControl().isLookingAtTarget()) {
-                golem.getLookControl().setLookAt(Vec3.atCenterOf(blockPos));
+        tryTicks++;
+        if (shouldRecalculatePath()) {
+            System.out.println("recalc");
+            System.out.println(blacklist);
+            if (!fail && !nearbyItems.isEmpty()) {
+                blockPos = oldest.blockPosition();
+                System.out.println(oldest.blockPosition());
+                fail = !golem.getNavigation().moveTo(oldest, getSpeed());
+                System.out.println(fail);
+                if (!golem.getLookControl().isLookingAtTarget()) {
+                    golem.getLookControl().setLookAt(Vec3.atCenterOf(blockPos));
+                }
+            }
+            if (fail && !nearbyItems.isEmpty() && closeEnough(oldest.getOnPos())) {
+                System.out.println("fail");
+                failToReachGoal();
             }
         }
     }
 
-    public static ItemEntity getOldestTarget(List<ItemEntity> entities) {
+    @Override
+    public double acceptedDistance() {
+        return 1.0;
+    }
+
+    public ItemEntity getOldestTarget(List<ItemEntity> entities) {
         if (entities.isEmpty()) {
             return null;
         }
-        ItemEntity oldest = entities.get(0);
+        ItemEntity oldest = null;
         for (ItemEntity entity : entities) {
-            if (entity.getAge() > oldest.getAge()) {
+            if ((oldest == null || entity.getAge() > oldest.getAge()) && !blacklist.contains(entity.blockPosition())) {
                 oldest = entity;
             }
         }
         return oldest;
+    }
+
+    private double getSpeed() {
+        return this.speedModifier;
     }
 
     @Override
@@ -65,8 +96,14 @@ public class GolemPickupItemGoal extends MoveToBlockGoal {
         return canUse();
     }
 
-    private double getSpeed() {
-        return this.speedModifier;
+    @Override
+    protected void blackListAdd(BlockPos blockPos) {
+        blacklist.add(blockPos);
+    }
+
+    @Override
+    protected void blackListClear() {
+        blacklist.clear();
     }
 }
 

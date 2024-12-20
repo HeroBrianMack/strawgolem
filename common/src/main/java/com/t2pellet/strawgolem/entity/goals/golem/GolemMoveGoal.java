@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import java.util.List;
 import java.util.function.Predicate;
@@ -19,14 +20,13 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     protected final ServerLevel level;
     protected Vec3 oldBlockPos = null;
     protected boolean scrambled = false;
-    protected E blackList;
     protected boolean fail = false;
+    protected int failCount = 0;
     public Predicate<StrawGolem> validGolem = this::validGolem;
 
-    public GolemMoveGoal(PathfinderMob mob, double speed, int range, StrawGolem golem, BlacklistCapability obj) {
+    public GolemMoveGoal(PathfinderMob mob, double speed, int range, StrawGolem golem) {
         super(mob, speed, range);
         this.golem = golem;
-        updateBlackList();
         this.level = (ServerLevel) golem.level();
     }
 
@@ -55,11 +55,13 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
                 scramblePath(golem);
             } else if (fail) { // Golem cannot path to target, find new target.
                 fail = false;
-                blackList.addInvalidPos(blockPos);
+                System.out.println("ADD");
+                blackListAdd(blockPos);
                 if (!findNearestBlock()) {
+                    System.out.println("CLEAR");
                     // Give up on new pathing something has gone seriously wrong with code
                     // or player didn't make the target accessible
-                    blackList.clearInvalidPos();
+                    blackListClear();
                     if (findNearestBlock()) {
                         return true;
                     }
@@ -112,6 +114,11 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     }
 
     public boolean failToReachGoal() {
+        failCount++;
+        // Golem can only fail to reach a goal twice before deeming it impossible
+        if (failCount >= 3) {
+            return false;
+        }
         double x = blockPos.getX();
         double y = blockPos.getY();
         double z = blockPos.getZ();
@@ -135,16 +142,11 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     @Override
     public void start() {
         super.start();
+        failCount = 0;
         oldBlockPos = golem.position();
         if (!StrawgolemConfig.Harvesting.permanentIgnore.get()) {
-            updateBlackList();
-            blackList.clearInvalidPos();
+            blackListClear();
         }
-    }
-
-    @Override
-    public void tick() {
-        updateBlackList();
     }
 
     protected boolean withinDistance(BlockPos targetPos, double distance) {
@@ -161,6 +163,6 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
     }
 
     public abstract double acceptedDistance();
-    protected abstract void updateBlackList();
-
+    protected abstract void blackListAdd(BlockPos blockPos);
+    protected abstract void blackListClear();
 }
