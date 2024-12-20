@@ -4,9 +4,12 @@ import com.t2pellet.tlib.config.api.Config;
 import com.t2pellet.tlib.config.api.property.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @Config.ModConfig(comment = "Config for Straw Golem")
 public class StrawgolemConfig extends Config {
@@ -119,10 +122,38 @@ public class StrawgolemConfig extends Config {
     public static class Experimental {
         @Entry(comment = "Whether the golem should use an experimental harvesting method")
         public static final BoolProperty experimentalHarvesting = new BoolProperty(false);
+        @Entry(comment = "Whether golems should pick up dropped items")
+        public static final BoolProperty golemPickup = new BoolProperty(true);
+        @Entry(comment = "Whether to have a whitelist for items to pick up. This will disable the golem picking any items not listed in pickupItems. (Requires restart)")
+        public static final BoolProperty pickupWhiteList = new BoolProperty(false);
+        @Entry(comment = "Specific items for golems to pick up. Only applies if golemPickup=true. (Requires restart)")
+        public static final ListProperty<String> pickupItems = createPrefilledItemList(itemPath(Items.APPLE), itemPath(Items.MELON_SLICE));
+        @Entry(comment = "Presets for golems to pick up. \"Food\", all edible items, \"Non-meat\", all edible non-meat items, \"All\", all items, and \"None\", no items. Only applies if golemPickup=true." +
+                " Will apply over whitelist, but this will not act as a whitelist")
+        public static final StringProperty pickupPresets = new StringProperty("Non-meat");
+        @Entry(comment = "The type of items the golem should pick up (see Block Tags)")
+        public static final StringProperty pickupType = new StringProperty("crops");
+
     }
     private static ListProperty<String> createBlockIDList() {
         return ListProperty.of(new ArrayList<>(), (s) -> {
             return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.BLOCK.containsKey(new ResourceLocation(s));
         });
+    }
+
+    private static ListProperty<String> createItemIDList() {
+        return ListProperty.of(new ArrayList<>(), (s) -> {
+            return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
+        });
+    }
+
+    private static ListProperty<String> createPrefilledItemList(String... items) {
+        return ListProperty.of(new ArrayList<>(List.of(items)), (s) -> {
+            return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
+        });
+    }
+
+    private static String itemPath(Item item) {
+        return BuiltInRegistries.ITEM.getKey(item).toString();
     }
 }

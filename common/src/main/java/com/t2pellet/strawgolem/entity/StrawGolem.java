@@ -1,5 +1,6 @@
 package com.t2pellet.strawgolem.entity;
 
+import com.t2pellet.strawgolem.Constants;
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.animations.StrawgolemArmsController;
 import com.t2pellet.strawgolem.entity.animations.StrawgolemHarvestController;
@@ -19,8 +20,7 @@ import com.t2pellet.strawgolem.registry.StrawgolemSounds;
 import com.t2pellet.tlib.Services;
 import com.t2pellet.tlib.entity.capability.api.CapabilityManager;
 import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
+import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -30,8 +30,10 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -56,7 +58,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.StemGrownBlock;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
@@ -66,10 +73,7 @@ import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import software.bernie.geckolib.util.RenderUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 
 // TODO : Fix bug - not always walking fully to destination
@@ -132,6 +136,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
         harvester = capabilities.addCapability(Harvester.class);
         deliverer = capabilities.addCapability(Deliverer.class);
         tether = capabilities.addCapability(Tether.class);
+        updateValidItems();
     }
 
     @Override
@@ -518,14 +523,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     }
 
     public boolean canHoldItem(ItemStack item) {
-        if (validPickupItems == null) {
-            validPickupItems = new HashSet<>();
-            validPickupItems.add(Items.APPLE);
-        }
-        if (!heldItem.get().isEmpty()) {
-            return false;
-        }
-        return validPickupItems.contains(item.getItem());
+        return StrawgolemConfig.Experimental.golemPickup.get() && (processPreset(item) || validPickupItems.contains(item.getItem()));
     }
 
     /**
@@ -537,6 +535,73 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
         return canHoldItem(entity.getItem());
     }
 
+    private boolean processPreset(ItemStack item) {
+        String preSet = StrawgolemConfig.Experimental.pickupPresets.get();
+        if (preSet.equalsIgnoreCase("All")) {
+            return true;
+        }
+        if (preSet.equalsIgnoreCase("None")) {
+            return false;
+        }
+        if (!item.isEdible()) {
+            return false;
+        }
+        if (preSet.equalsIgnoreCase("Food")) {
+            return true;
+        }
+        if (preSet.equalsIgnoreCase("Non-meat")) {
+            return !item.getItem().getFoodProperties().isMeat();
+        }
+        return false;
+    }
+    private void updateValidItems() {
+        if (validPickupItems != null) {
+            return;
+        }
+
+        validPickupItems = new HashSet<>();
+
+
+        if (!StrawgolemConfig.Experimental.pickupWhiteList.get()) {
+            ResourceLocation location = new ResourceLocation(StrawgolemConfig.Experimental.pickupType.get());
+            // ToDo Test this to make sure the config part works!
+            if (!ResourceLocation.isValidResourceLocation(StrawgolemConfig.Experimental.pickupType.get())) {
+                Constants.LOG.error("Invalid pickupType Block Tag Supplied! Using default: \"crops\"");
+                location = new ResourceLocation("crops");
+            }
+            // This portion is getting the drops of every block matching pickupType (assuming the blocks' drops aren't location-locked)
+            for (Holder<Block> b : BuiltInRegistries.BLOCK.getTag(TagKey.create(Registries.BLOCK, location)).get().stream().toList()) {
+                if (b.value() instanceof CropBlock crop) {
+                    BlockState s = crop.defaultBlockState();
+                    IntegerProperty age = crop.AGE;
+                    for (Property<?> p : s.getProperties()) {
+                        if (p instanceof IntegerProperty intProp) {
+                            if (intProp.getName().equals("age")) {
+                                age = intProp;
+                            }
+                        }
+                    }
+                    if (crop.defaultBlockState().hasProperty(age)) {
+                        s = s.setValue(age, Collections.max(age.getPossibleValues()));
+                    }
+
+                    if (level() instanceof ServerLevel e) {
+                        LootParams.Builder builder = new LootParams.Builder(e).withParameter(LootContextParams.TOOL, ItemStack.EMPTY).withParameter(LootContextParams.ORIGIN, Vec3.ZERO);
+                        for (ItemStack drop : s.getDrops(builder)) {
+                            validPickupItems.add(drop.getItem());
+                        }
+                    }
+                } else if (b.value() instanceof StemBlock stem) {
+                    validPickupItems.add(stem.getFruit().asItem());
+                }
+            }
+        }
+        for (String s : StrawgolemConfig.Experimental.pickupItems.get()) {
+            if (ResourceLocation.isValidResourceLocation(s)) {
+                validPickupItems.add(BuiltInRegistries.ITEM.get(new ResourceLocation(s)));
+            }
+        }
+    }
     /* Helpers */
 
     public boolean shouldHoldAboveHead() {
