@@ -142,9 +142,7 @@ public class StrawgolemConfig extends Config {
     }
 
     private static ListProperty<String> createItemIDList() {
-        return ListProperty.of(new ArrayList<>(), (s) -> {
-            return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
-        });
+        return createPrefilledItemList();
     }
 
     private static ListProperty<String> createPrefilledItemList(String... items) {
