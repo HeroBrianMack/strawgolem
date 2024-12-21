@@ -130,7 +130,7 @@ public class StrawgolemConfig extends Config {
         public static final ListProperty<String> pickupItems = createPrefilledItemList(itemPath(Items.APPLE), itemPath(Items.MELON_SLICE));
         @Entry(comment = "Presets for golems to pick up. \"Food\", all edible items, \"Non-meat\", all edible non-meat items, \"All\", all items, and \"None\", no items. Only applies if golemPickup=true." +
                 " Will apply over whitelist, but this will not act as a whitelist")
-        public static final StringProperty pickupPresets = new StringProperty("Non-meat");
+        public static final StringProperty pickupPresets = new StringProperty("None");
         @Entry(comment = "The type of items the golem should pick up (see Block Tags)")
         public static final StringProperty pickupType = new StringProperty("crops");
 
