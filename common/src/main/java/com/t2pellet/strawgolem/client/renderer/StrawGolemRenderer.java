@@ -146,7 +146,7 @@ public class StrawGolemRenderer extends DynamicGeoEntityRenderer<StrawGolem> {
     private void renderBlock2(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, StrawGolem golem) {
         poseStack.pushPose();
         poseStack.mulPose(Axis.XP.rotationDegrees(golem.isHoldingBlock() ? -180.0F : -90.0F));
-        poseStack.translate(0, golem.isHoldingBlock() ? 0.0F : 0.0F, golem.isHoldingBlock() ? 0.0F : 0.1F);
+        poseStack.translate(0, golem.isHoldingBlock() ? -0.492F : -0.01F, golem.isHoldingBlock() ? 0.0F : 0.3F);
         poseStack.scale(0.5F, 0.5F, 0.5F);
         this.renderer.renderItem(golem, heldItem, ItemDisplayContext.NONE, false, poseStack, bufferSource, packedLight);
         poseStack.popPose();
