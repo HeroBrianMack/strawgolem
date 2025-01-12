@@ -16,6 +16,7 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
+@Deprecated
 public class StrawgolemItemLayer extends GeoRenderLayer<StrawGolem> {
 
     private final ItemInHandRenderer itemInHandRenderer;
@@ -33,7 +34,7 @@ public class StrawgolemItemLayer extends GeoRenderLayer<StrawGolem> {
         HeldItem heldItem = golem.getHeldItem();
         if (heldItem.has()) {
             matrixStackIn.pushPose();
-            this.model.translateToHand(matrixStackIn);
+//            this.model.translateToHidden(matrixStackIn);
             this.renderItem(matrixStackIn, bufferIn, packedLightIn, golem);
             matrixStackIn.popPose();
         }
@@ -41,6 +42,15 @@ public class StrawgolemItemLayer extends GeoRenderLayer<StrawGolem> {
 
     private void renderItem(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, StrawGolem golem) {
         HeldItem heldItem = golem.getHeldItem();
+        if (heldItem.has()) {
+            matrixStackIn.pushPose();
+//            this.model.translateToHidden(matrixStackIn);
+            this.renderItem(matrixStackIn, bufferIn, packedLightIn, golem);
+            matrixStackIn.popPose();
+        }
+        //        if (model.getBone("hidden").isPresent()) {
+//            System.out.println("hidden found");
+//        }
         boolean holdAboveHead = golem.shouldHoldAboveHead();
         boolean isBlock = golem.isHoldingBlock();
         matrixStackIn.pushPose();
@@ -50,4 +60,5 @@ public class StrawgolemItemLayer extends GeoRenderLayer<StrawGolem> {
         this.itemInHandRenderer.renderItem(golem, heldItem.get(), ItemDisplayContext.NONE, false, matrixStackIn, bufferIn, packedLightIn);
         matrixStackIn.popPose();
     }
+
 }

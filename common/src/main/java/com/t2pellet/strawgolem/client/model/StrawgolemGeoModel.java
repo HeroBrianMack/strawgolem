@@ -68,6 +68,7 @@ public class StrawgolemGeoModel extends GeoModel<StrawGolem> {
         }
     }
 
+    @Deprecated
     public void translateToHand(PoseStack poseStack) {
         if (getBone("arms").isPresent() && getBone("upper").isPresent()) {
             GeoBone arms = getBone("arms").get();
