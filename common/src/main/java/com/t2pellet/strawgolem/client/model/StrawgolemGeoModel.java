@@ -11,6 +11,7 @@ import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.model.data.EntityModelData;
+import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.util.RenderUtils;
 
 public class StrawgolemGeoModel extends GeoModel<StrawGolem> {
@@ -25,12 +26,17 @@ public class StrawgolemGeoModel extends GeoModel<StrawGolem> {
 
 
     @Override
-    public ResourceLocation getModelResource(StrawGolem golem) {
+    public ResourceLocation getModelResource(StrawGolem golem, GeoRenderer<StrawGolem> renderer) {
         return modelResource;
     }
 
     @Override
-    public ResourceLocation getTextureResource(StrawGolem golem) {
+    public ResourceLocation getModelResource(StrawGolem golem) {
+        return getModelResource(golem, null);
+    }
+
+    @Override
+    public ResourceLocation getTextureResource(StrawGolem golem, GeoRenderer<StrawGolem> renderer) {
         if (!StrawgolemConfig.Visual.golemDecayingTexture.get()) return newTextureResource;
 
         DecayState state = golem.getDecay().getState();
@@ -47,6 +53,10 @@ public class StrawgolemGeoModel extends GeoModel<StrawGolem> {
         }
     }
 
+    @Override
+    public ResourceLocation getTextureResource(StrawGolem golem) {
+        return getTextureResource(golem, null);
+    }
 
 
     @Override
