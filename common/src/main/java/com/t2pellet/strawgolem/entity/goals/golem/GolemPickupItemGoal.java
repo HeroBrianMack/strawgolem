@@ -51,19 +51,14 @@ public class GolemPickupItemGoal extends GolemMoveGoal {
         ItemEntity oldest = getOldestTarget(nearbyItems);
         tryTicks++;
         if (shouldRecalculatePath()) {
-            System.out.println("recalc");
-            System.out.println(blacklist);
             if (!fail && oldest != null) {
                 blockPos = oldest.blockPosition();
-                System.out.println(oldest.blockPosition());
                 fail = !golem.getNavigation().moveTo(oldest, getSpeed());
-                System.out.println(fail);
                 if (!golem.getLookControl().isLookingAtTarget()) {
                     golem.getLookControl().setLookAt(Vec3.atCenterOf(blockPos));
                 }
             }
             if (fail && oldest != null && closeEnough(oldest.getOnPos())) {
-                System.out.println("fail");
                 failToReachGoal();
             }
         }

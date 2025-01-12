@@ -123,7 +123,7 @@ public class StrawgolemConfig extends Config {
         @Entry(comment = "Whether the golem should use an experimental harvesting method")
         public static final BoolProperty experimentalHarvesting = new BoolProperty(false);
         @Entry(comment = "Whether golems should pick up dropped items")
-        public static final BoolProperty golemPickup = new BoolProperty(true);
+        public static final BoolProperty golemPickup = new BoolProperty(false);
         @Entry(comment = "Whether to have a whitelist for items to pick up. This will disable the golem picking any items not listed in pickupItems. (Requires restart)")
         public static final BoolProperty pickupWhiteList = new BoolProperty(false);
         @Entry(comment = "Specific items for golems to pick up. Only applies if golemPickup=true. (Requires restart)")

@@ -55,10 +55,8 @@ public abstract class GolemMoveGoal<E extends BlacklistCapability> extends MoveT
                 scramblePath(golem);
             } else if (fail) { // Golem cannot path to target, find new target.
                 fail = false;
-                System.out.println("ADD");
                 blackListAdd(blockPos);
                 if (!findNearestBlock()) {
-                    System.out.println("CLEAR");
                     // Give up on new pathing something has gone seriously wrong with code
                     // or player didn't make the target accessible
                     blackListClear();
