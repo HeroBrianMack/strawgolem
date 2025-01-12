@@ -6,11 +6,11 @@ import com.mojang.math.Axis;
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.client.model.StrawgolemGeoModel;
 import com.t2pellet.strawgolem.entity.StrawGolem;
-import com.t2pellet.strawgolem.entity.capabilities.held_item.HeldItem;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.DynamicGeoEntityRenderer;
+import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
 import software.bernie.geckolib.renderer.layer.ItemArmorGeoLayer;
 
@@ -29,25 +30,12 @@ public class StrawGolemRenderer extends DynamicGeoEntityRenderer<StrawGolem> {
     ItemInHandRenderer renderer;
     public StrawGolemRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new StrawgolemGeoModel());
-//        this.addRenderLayer(new StrawgolemItemLayer(this, (StrawgolemGeoModel) model, renderManager.getItemInHandRenderer()));
         renderer = renderManager.getItemInHandRenderer();
-        addRenderLayer(new ItemArmorGeoLayer<>(this) {
-            // Return the equipment slot relevant to the bone we're using
-            @Nonnull
-            @Override
-            protected EquipmentSlot getEquipmentSlotForBone(GeoBone bone, ItemStack stack, StrawGolem animatable) {
-                return switch (bone.getName()) {
-                    case "rightArm" -> !animatable.isLeftHanded() ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
-                    case "leftArm" -> animatable.isLeftHanded() ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
-                    default -> super.getEquipmentSlotForBone(bone, stack, animatable);
-                };
-            }
-        });
         addRenderLayer(new BlockAndItemGeoLayer<>(this) {
             @javax.annotation.Nullable
             @Override
             protected ItemStack getStackForBone(GeoBone bone, StrawGolem golem) {
-                // Retrieve the items in the entity's hands for the relevant bone
+                // Retrieve the items in the golem's hands for the relevant bone
                 if (bone.getName().equals("hidden") && !golem.shouldHoldAboveHead()) {
                     return heldItem;
                 } else if (bone.getName().equals("head") && golem.shouldHoldAboveHead()) {
@@ -61,7 +49,6 @@ public class StrawGolemRenderer extends DynamicGeoEntityRenderer<StrawGolem> {
             protected ItemDisplayContext getTransformTypeForStack(GeoBone bone, ItemStack stack, StrawGolem animatable) {
                 // Apply the camera transform for the given hand
                 return switch (bone.getName()) {
-                    case "leftArm", "rightArm" -> ItemDisplayContext.NONE;
                     default -> ItemDisplayContext.NONE;
                 };
             }
@@ -71,22 +58,22 @@ public class StrawGolemRenderer extends DynamicGeoEntityRenderer<StrawGolem> {
             protected void renderStackForBone(PoseStack poseStack, GeoBone bone, ItemStack stack, StrawGolem golem,
                                               MultiBufferSource bufferSource, float partialTick, int packedLight, int packedOverlay) {
                 if (golem.shouldHoldAboveHead()) {
-                    // Not a huge fan of this, but rendering above head was already working fairly correctly
-                    // Possibly switch this to bone rendered, but low-priority
-                    renderBlock2(poseStack, bufferSource, packedLight, golem);
-
-//                    poseStack.translate(0.0f, 1.0f, 0.0f);
+                    StrawGolemRenderer.this.renderBlockForBone(poseStack, bufferSource, packedLight, golem);
                 } else {
                     if (stack == heldItem) {
                         poseStack.mulPose(Axis.XP.rotationDegrees(0f));
                         poseStack.scale(0.5f, 0.5f, 0.5f);
                     }
-
-
                     super.renderStackForBone(poseStack, bone, stack, golem, bufferSource, partialTick, packedLight, packedOverlay);
                 }
             }
         });
+    }
+
+    // Only here because the IDE marked it as an error (will still run if removed)
+    @Override
+    public ResourceLocation getTextureLocation(StrawGolem golem) {
+        return this.getGeoModel().getTextureResource(golem);
     }
 
     @Override
@@ -126,24 +113,8 @@ public class StrawGolemRenderer extends DynamicGeoEntityRenderer<StrawGolem> {
         poseStack.translate(offX, 0, offZ);
     }
 
-    private void renderBlock(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, StrawGolem golem) {
-        HeldItem heldItem = golem.getHeldItem();
-        if (heldItem.has()) {
-            matrixStackIn.pushPose();
-//            this.model.translateToHidden(matrixStackIn);
-            boolean holdAboveHead = golem.shouldHoldAboveHead();
-            boolean isBlock = golem.isHoldingBlock();
-            matrixStackIn.pushPose();
-            matrixStackIn.mulPose(Axis.XP.rotationDegrees(isBlock ? -180.0F : -90.0F));
-            matrixStackIn.translate(0, holdAboveHead ? isBlock ? -0.3F : 0.0F : -0.45F, holdAboveHead ? isBlock ? 0.0F : 0.1F : -0.15F);
-            matrixStackIn.scale(0.5F, 0.5F, 0.5F);
-            this.renderer.renderItem(golem, heldItem.get(), ItemDisplayContext.NONE, false, matrixStackIn, bufferIn, packedLightIn);
-            matrixStackIn.popPose();
-            matrixStackIn.popPose();
-        }
-    }
-
-    private void renderBlock2(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, StrawGolem golem) {
+    // Note: This is not the renderBlockForBone method of geckolib
+    private void renderBlockForBone(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, StrawGolem golem) {
         poseStack.pushPose();
         poseStack.mulPose(Axis.XP.rotationDegrees(golem.isHoldingBlock() ? -180.0F : -90.0F));
         poseStack.translate(0, golem.isHoldingBlock() ? -0.492F : -0.01F, golem.isHoldingBlock() ? 0.0F : 0.3F);
