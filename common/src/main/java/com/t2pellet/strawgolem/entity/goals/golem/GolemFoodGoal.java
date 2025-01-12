@@ -2,6 +2,7 @@ package com.t2pellet.strawgolem.entity.goals.golem;
 
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
+import com.t2pellet.strawgolem.entity.capabilities.hunger.HungerState;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.item.crafting.Ingredient;
 
@@ -15,6 +16,6 @@ public class GolemFoodGoal extends TemptGoal {
 
     @Override
     public boolean canUse() {
-        return !golem.getHeldItem().has() && super.canUse();
+        return !golem.getHeldItem().has() && golem.getHunger().getState() != HungerState.FULL && super.canUse();
     }
 }

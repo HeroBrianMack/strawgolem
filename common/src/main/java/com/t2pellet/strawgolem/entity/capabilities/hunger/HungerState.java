@@ -33,10 +33,13 @@ public enum HungerState {
         return description;
     }
 
-    public void getSpeed(StrawGolem golem) {
+    public void updateSpeed(StrawGolem golem) {
+        golem.getAttributes().getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(getSpeedValue());
+    }
+
+    public double getSpeedValue() {
         int hungerStates = HungerState.values().length;
         float speedRatio = (float) (hungerStates - value) / hungerStates;
-        float speedValue = (float) (StrawGolem.defaultMovement * speedRatio);
-        golem.getAttributes().getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(speedValue);
+        return (float) (StrawGolem.defaultMovement * speedRatio);
     }
 }

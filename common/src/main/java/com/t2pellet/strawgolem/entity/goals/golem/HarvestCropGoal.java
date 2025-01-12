@@ -11,18 +11,16 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 
 
-public class HarvestCropGoal extends MoveToBlockGoal {
-
-    private final StrawGolem golem;
+public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
 
     public HarvestCropGoal(StrawGolem golem) {
-        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get());
-        this.golem = golem;
+        super(golem, StrawgolemConfig.Behaviour.golemWalkSpeed.get(), StrawgolemConfig.Harvesting.harvestRange.get(), golem);
     }
 
     @Override
@@ -54,8 +52,28 @@ public class HarvestCropGoal extends MoveToBlockGoal {
 
     @Override
     public void tick() {
+        super.tick();
+        if (!isValidTarget(this.mob.level(), this.blockPos) && blockPos != null) {
+            blackListAdd(blockPos);
+            if (!findNearestBlock()) {
+                return;
+            }
+        }
         BlockPos targetPos = this.getMoveToTarget();
-        if (blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
+        tryTicks++;
+        // Default below being at actual targetPos.
+        BlockPos below = targetPos.below();
+        if (StrawgolemConfig.Harvesting.enableVineHarvest.get()) {
+            below = targetPos.below().below();
+            Block belowBlock = golem.level().getBlockState(below).getBlock();
+            while (!blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance()) &&
+                    belowBlock.equals(golem.level().getBlockState(targetPos.below()).getBlock()) && CropUtil.isGrownCrop(golem.level(), targetPos.below())) {
+                below = below.below();
+                belowBlock = golem.level().getBlockState(below).getBlock();
+            }
+        }
+
+        if (withinDistance(targetPos) || withinDistance(below)) {
             Harvester harvester = golem.getHarvester();
             golem.getNavigation().stop();
             if (harvester.isHarvestingBlock()) {
@@ -71,7 +89,14 @@ public class HarvestCropGoal extends MoveToBlockGoal {
             });
         } else {
             if (this.shouldRecalculatePath()) {
-                this.mob.getNavigation().moveTo((double)((float)targetPos.getX()) + 0.5D, (double)targetPos.getY() + 0.5D, (double)((float)targetPos.getZ()) + 0.5D, this.speedModifier);
+                if(!golemCollision()) {
+                    if (!fail && !this.mob.getNavigation().moveTo((double) ((float) targetPos.getX()), (double) targetPos.getY(), (double) ((float) targetPos.getZ()), this.speedModifier)) {
+                        fail = true;
+                    }
+                    if (fail && still() && (closeEnough(blockPos) || closeEnough(below))) {
+                        failToReachGoal();
+                    }
+                }
             }
             if (!golem.getLookControl().isLookingAtTarget()) {
                 golem.getLookControl().setLookAt(Vec3.atCenterOf(blockPos));
@@ -82,6 +107,7 @@ public class HarvestCropGoal extends MoveToBlockGoal {
     @Override
     public void start() {
         super.start();
+        fail = false;
         golem.playSound(StrawgolemSounds.GOLEM_INTERESTED.get());
         // Update the tether to the crop we're harvesting
         golem.getTether().update(blockPos);
@@ -89,6 +115,34 @@ public class HarvestCropGoal extends MoveToBlockGoal {
 
     @Override
     public double acceptedDistance() {
-        return 1.2D;
+        return 1.3D;
+    }
+
+
+
+    @Override
+    protected boolean findNearestBlock() {
+        if (!golem.getHarvester().isHarvesting()) {
+            golem.getHarvester().findHarvestables();
+        }
+       if (golem.getHarvester().getHarvesting().isPresent()) {
+           BlockPos blockPos = golem.getHarvester().getHarvesting().get();
+           if (isValidTarget(mob.level(), blockPos)) {
+               this.blockPos = blockPos;
+               return true;
+           }
+       }
+        return false;
+    }
+
+
+    @Override
+    protected void blackListAdd(BlockPos blockPos) {
+        golem.getHarvester().addInvalidPos(blockPos);
+    }
+
+    @Override
+    protected void blackListClear() {
+        golem.getHarvester().clearInvalidPos();
     }
 }

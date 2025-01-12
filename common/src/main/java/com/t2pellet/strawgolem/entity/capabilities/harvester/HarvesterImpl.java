@@ -20,8 +20,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
@@ -31,6 +33,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
 
     private final Deque<BlockPos> harvestQueue = new ArrayDeque<>();
     private BlockPos currentHarvestPos = null;
+    private final Set<BlockPos> invalidPos = new HashSet<>();
 
     protected HarvesterImpl(E e) {
         super(e);
@@ -118,7 +121,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
                             entityPos.offset(-x, -y, -z),
                     };
                     for (BlockPos position : positions) {
-                        if (CropUtil.isGrownCrop(entity.level(), position) && VisibilityUtil.canSee((LivingEntity) entity, position)) {
+                        if (CropUtil.isGrownCrop(entity.level(), position) && VisibilityUtil.canSee((LivingEntity) entity, position) && !invalidPos.contains(position)) {
                             queueHarvest(position);
                         }
                     }
@@ -127,15 +130,48 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
         }
     }
 
+    @Override
+    public void addInvalidPos(BlockPos pos) {
+        if (harvestQueue.remove(pos)) {
+            invalidPos.add(pos);
+        }
+        if (currentHarvestPos == null || currentHarvestPos.equals(pos)) {
+            currentHarvestPos = null;
+            startHarvest();
+        }
+    }
+
+    @Override
+    public void clearInvalidPos() {
+        invalidPos.clear();
+    }
+
     private void harvestBlock() {
         if (!entity.level().isClientSide && isHarvesting() && CropUtil.isGrownCrop(entity.level(), currentHarvestPos)) {
             BlockState state = entity.level().getBlockState(currentHarvestPos);
-            BlockState defaultState = state.getBlock() instanceof StemGrownBlock ? Blocks.AIR.defaultBlockState() : state.getBlock().defaultBlockState();
+            BlockState newState = state.getBlock() instanceof StemGrownBlock ? Blocks.AIR.defaultBlockState() : state.getBlock().defaultBlockState();
+            BlockState defaultState = state.getBlock().defaultBlockState();
             entity.setItemSlot(EquipmentSlot.MAINHAND, pickupLoot(state));
+            // Experimental Version: Resets the age back to default, maintains all other properties
+            if (!(state.getBlock() instanceof StemGrownBlock) && StrawgolemConfig.Experimental.experimentalHarvesting.get()) {
+                newState = state;
+                for (Property<?> prop : defaultState.getProperties()) {
+                    if (prop instanceof IntegerProperty intProp && prop.getName().equals("age")) {
+                        newState = newState.setValue(intProp, defaultState.getValue(intProp));
+                    }
+                }
+            } else if (!(state.getBlock() instanceof StemGrownBlock)){ // Hard coded, but can guaranteed solve problems if aware of them.
+                newState = defaultState;
+                // Overly coded, will modify for future issues or scrap if experimental works
+                if (state.hasProperty(BooleanProperty.create("ropelogged"))) {
+                    newState = newState.setValue(BooleanProperty.create("ropelogged"), state.getValue(BooleanProperty.create("ropelogged")));
+                }
+            }
             // Break block
             entity.level().destroyBlock(currentHarvestPos, false, entity);
-            entity.level().setBlockAndUpdate(currentHarvestPos, defaultState);
-            entity.level().gameEvent(defaultState.isAir() ? GameEvent.BLOCK_DESTROY : GameEvent.BLOCK_PLACE, currentHarvestPos, GameEvent.Context.of(entity, defaultState));
+            entity.level().setBlockAndUpdate(currentHarvestPos, newState);
+
+            entity.level().gameEvent(newState.isAir() ? GameEvent.BLOCK_DESTROY : GameEvent.BLOCK_PLACE, currentHarvestPos, GameEvent.Context.of(entity, newState));
             // Update state and sync
             currentHarvestPos = null;
             synchronize();

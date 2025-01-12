@@ -7,7 +7,6 @@ import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class HungerImpl <E extends LivingEntity & ICapabilityHaver> extends AbstractCapability<E> implements Hunger{
     private HungerState state = HungerState.FULL;
@@ -20,6 +19,7 @@ public class HungerImpl <E extends LivingEntity & ICapabilityHaver> extends Abst
 
     @Override
     public void hunger(StrawGolem golem) {
+        if (!StrawgolemConfig.Lifespan.enabled.get() || state == null) return;
         if (state != HungerState.STARVING) {
             hungerTime--;
             if (hungerTime <= 0) {
@@ -48,7 +48,7 @@ public class HungerImpl <E extends LivingEntity & ICapabilityHaver> extends Abst
     }
 
     private void updateSpeedFromState(boolean shouldUpdate, StrawGolem golem) {
-        state.getSpeed(golem);
+        state.updateSpeed(golem);
 
 //        entity.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(speed);
 //        if (shouldUpdate /*|| entity.getSpeed() > speed*/) entity.setSpeed(speed);

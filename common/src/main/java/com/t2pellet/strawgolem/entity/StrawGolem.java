@@ -1,5 +1,6 @@
 package com.t2pellet.strawgolem.entity;
 
+import com.t2pellet.strawgolem.Constants;
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.animations.StrawgolemArmsController;
 import com.t2pellet.strawgolem.entity.animations.StrawgolemHarvestController;
@@ -19,17 +20,21 @@ import com.t2pellet.strawgolem.registry.StrawgolemSounds;
 import com.t2pellet.tlib.Services;
 import com.t2pellet.tlib.entity.capability.api.CapabilityManager;
 import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
-import net.minecraft.core.BlockPos;
+import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -43,6 +48,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
@@ -50,8 +56,14 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.StemGrownBlock;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
@@ -61,7 +73,8 @@ import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import software.bernie.geckolib.util.RenderUtils;
 
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Predicate;
 
 // TODO : Fix bug - not always walking fully to destination
 public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabilityHaver {
@@ -69,7 +82,11 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     public static final Item REPAIR_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
     public static final Item FEED_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.feedItem.get()));
 
-    public static final Item BARREL_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.barrelItem.get()));
+//    public static final Item BARREL_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.barrelItem.get()));
+public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, new ResourceLocation(StrawgolemConfig.Lifespan.barrelItem.get()));
+
+//public static CompoundTag = new TagParser(new StringReader("minecraft:planks")));
+
     private static final double WALK_DISTANCE = 0.00000001D;
     private static final double RUN_DISTANCE = 0.003D;
 
@@ -94,6 +111,10 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     // Misc
     private boolean isFirstTick = true;
 
+    private static Set<Item> validPickupItems;
+    // For those looking at this code being confused, this is for the test(T) method for predicate.
+    public Predicate<ItemEntity> validGolemItems = this::canHoldItem;
+
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MOVEMENT_SPEED, defaultMovement)
@@ -115,6 +136,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
         harvester = capabilities.addCapability(Harvester.class);
         deliverer = capabilities.addCapability(Deliverer.class);
         tether = capabilities.addCapability(Tether.class);
+        updateValidItems();
     }
 
     @Override
@@ -146,6 +168,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
         this.goalSelector.addGoal(2, new GolemBeShyGoal(this));
         this.goalSelector.addGoal(3, new HarvestCropGoal(this));
         this.goalSelector.addGoal(3, new DeliverCropGoal(this));
+        this.goalSelector.addGoal(3, new GolemPickupItemGoal(this));
         this.goalSelector.addGoal(5, new ReturnToTetherGoal(this));
         this.goalSelector.addGoal(6, new GolemWanderGoal(this));
         if (Services.PLATFORM.isModLoaded("animal_feeding_trough")) {
@@ -160,6 +183,14 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     @Override
     public void baseTick() {
         super.baseTick();
+//        if (goalSelector.getRunningGoals().toArray().length != 0) {
+//            System.out.println("GOALS:");
+//            for (Object obj : goalSelector.getRunningGoals().toArray()) {
+//                if (obj instanceof WrappedGoal w)
+//                    System.out.print(" " + w.getGoal().getClass().getSimpleName());
+//            }
+//            System.out.println();
+//        }
         if (level().isClientSide) baseClientTick();
         else baseServerTick();
         baseCommonTick();
@@ -217,6 +248,9 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
 
     @Override
     protected @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand) {
+        if (level().isClientSide) {
+            return InteractionResult.PASS;
+        }
         ItemStack item = player.getItemInHand(hand);
         if (item.getItem() == REPAIR_ITEM && decay.getState() != DecayState.NEW) {
             boolean success = decay.repair();
@@ -242,7 +276,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
             entityData.set(BARREL_HEALTH, StrawgolemConfig.Lifespan.barrelDurability.get());
             item.shrink(1);
             return InteractionResult.SUCCESS;
-        } else if (item.getItem() == BARREL_ITEM && hasBarrel()) {
+        } else if (item.is(BARREL_ITEM) && hasBarrel()) {
             boolean success = repairBarrel();
             if (success) {
                 item.shrink(1);
@@ -462,6 +496,112 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
         return StrawgolemSounds.GOLEM_DEATH.get();
     }
 
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        this.level().getProfiler().push("looting");
+        Vec3i vec3i = this.getPickupReach();
+        Vec3 vec = new Vec3(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+        vec = vec.scale(1.7D);
+        if (!this.level().isClientSide && this.isAlive() && !this.dead && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+            for(ItemEntity itementity : this.level().getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(vec.x(), vec.y(), vec.z()))) {
+                if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && this.wantsToPickUp(itementity.getItem())) {
+                    this.setItemSlot(EquipmentSlot.MAINHAND, itementity.getItem());
+
+                    itementity.discard();
+                }
+            }
+        }
+
+        this.level().getProfiler().pop();
+    }
+
+    @Override
+    public boolean wantsToPickUp(ItemStack item) {
+
+        return this.canHoldItem(item);
+    }
+
+    public boolean canHoldItem(ItemStack item) {
+        return StrawgolemConfig.Experimental.golemPickup.get() && (processPreset(item) || validPickupItems.contains(item.getItem()));
+    }
+
+    /**
+     * Helper method for saving me effort converting entities to stacks.
+     * @param entity The ItemEntity being converted into an ItemStack.
+     * @return If the StrawGolem can hold the item.
+     */
+    private boolean canHoldItem(ItemEntity entity) {
+        return canHoldItem(entity.getItem());
+    }
+
+    private boolean processPreset(ItemStack item) {
+        String preSet = StrawgolemConfig.Experimental.pickupPresets.get();
+        if (preSet.equalsIgnoreCase("All")) {
+            return true;
+        }
+        if (preSet.equalsIgnoreCase("None")) {
+            return false;
+        }
+        if (!item.isEdible()) {
+            return false;
+        }
+        if (preSet.equalsIgnoreCase("Food")) {
+            return true;
+        }
+        if (preSet.equalsIgnoreCase("Non-meat")) {
+            return !item.getItem().getFoodProperties().isMeat();
+        }
+        return false;
+    }
+    private void updateValidItems() {
+        if (validPickupItems != null) {
+            return;
+        }
+
+        validPickupItems = new HashSet<>();
+
+
+        if (!StrawgolemConfig.Experimental.pickupWhiteList.get()) {
+            ResourceLocation location = new ResourceLocation(StrawgolemConfig.Experimental.pickupType.get());
+            // ToDo Test this to make sure the config part works!
+            if (!ResourceLocation.isValidResourceLocation(StrawgolemConfig.Experimental.pickupType.get())) {
+                Constants.LOG.error("Invalid pickupType Block Tag Supplied! Using default: \"crops\"");
+                location = new ResourceLocation("crops");
+            }
+            // This portion is getting the drops of every block matching pickupType (assuming the blocks' drops aren't location-locked)
+            for (Holder<Block> b : BuiltInRegistries.BLOCK.getTag(TagKey.create(Registries.BLOCK, location)).get().stream().toList()) {
+                if (b.value() instanceof CropBlock crop) {
+                    BlockState s = crop.defaultBlockState();
+                    IntegerProperty age = crop.AGE;
+                    for (Property<?> p : s.getProperties()) {
+                        if (p instanceof IntegerProperty intProp) {
+                            if (intProp.getName().equals("age")) {
+                                age = intProp;
+                            }
+                        }
+                    }
+                    if (crop.defaultBlockState().hasProperty(age)) {
+                        s = s.setValue(age, Collections.max(age.getPossibleValues()));
+                    }
+
+                    if (level() instanceof ServerLevel e) {
+                        LootParams.Builder builder = new LootParams.Builder(e).withParameter(LootContextParams.TOOL, ItemStack.EMPTY).withParameter(LootContextParams.ORIGIN, Vec3.ZERO);
+                        for (ItemStack drop : s.getDrops(builder)) {
+                            validPickupItems.add(drop.getItem());
+                        }
+                    }
+                } else if (b.value() instanceof StemBlock stem) {
+                    validPickupItems.add(stem.getFruit().asItem());
+                }
+            }
+        }
+        for (String s : StrawgolemConfig.Experimental.pickupItems.get()) {
+            if (ResourceLocation.isValidResourceLocation(s)) {
+                validPickupItems.add(BuiltInRegistries.ITEM.get(new ResourceLocation(s)));
+            }
+        }
+    }
     /* Helpers */
 
     public boolean shouldHoldAboveHead() {
