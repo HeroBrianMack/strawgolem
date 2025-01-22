@@ -1,12 +1,12 @@
 # Straw Golem Rebaled Ported
 This mod adds a helpful (and awfully cute) little golem to do some of your farming for you. It can harvest, replant and deliver crops to a nearby chest. To download, head on over to CurseForge.
-- It's available in both [Fabric](https://www.curseforge.com/minecraft/mc-mods/straw-golem-reborn) and [Forge](https://www.curseforge.com/minecraft/mc-mods/strawgolem-reborn) editions, each in varying stages of development.
+- It's available in both [Fabric] and [Forge] (https://www.curseforge.com/minecraft/mc-mods/straw-golem-rebaled-ported) editions, each in almost equal stages of development
 - This mod, made for Minecraft 1.20+, is a port of the spiritual successor to the [original](https://www.curseforge.com/minecraft/mc-mods/strawgolem) Straw Golem mod, built for Minecraft 1.12.
 
 | ![strawgolem-a-270x270](https://user-images.githubusercontent.com/26723535/166476673-a377f3f9-b941-4581-8ae3-dac79e2f87a2.png) | 
 |:--:| 
-| *Straw Golem Reborn!* |
-# Straw Golem Reborn
+| *Straw Golem Rebaled Ported!* |
+# Straw Golem Rebaled Ported
 This mod adds a helpful (and awfully cute) little golem to do some of your farming for you. It can harvest, replant and deliver crops to a nearby chest.
 
 ## Getting Started
@@ -47,7 +47,7 @@ The mod has out-of-the-box compat for most modded crops. It also plays nice with
 
 ## Downloads
 Visit here:
-https://modrinth.com/mod/straw-golem
+(https://www.curseforge.com/minecraft/mc-mods/straw-golem-rebaled-ported)
 
 # Support Me
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G7PTE10)
+Nothing for now
