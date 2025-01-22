@@ -24,11 +24,16 @@ Once a Straw Golem gathers a crop item, it will seek out a chest to store the it
 The Straw Golem has a limited lifespan.
 - Every 10 minutes, theres a 1/5 chance it decays.
 - There are 4 decay states, from new to dying, with death thereafter
+- Every day it will progress a hunger state
+- There are 4 hunger states, full, peckish, hungry, starving
+- The golem will slow down the more hungry it is
 - This lifespan goes down faster when the golem is exposed to the rain or when it stands in water
 - The golem shivers when in rain water or cold
 - You can protect your golem from rain by building it a Straw Hat
 - The golem decays if it takes enough damage
-- Lifespan is restored by feeding the golem wheat, which also heals it. 
+- Lifespan is restored by feeding the golem wheat, which also heals it.
+- Hunger is restored by feeding the golem apples
+
 
 As your golem approaches old age, it will begin to to decay, and you will see visual changes to its texture. You may also start to see flies hovering about. Moreover, as it ages, its max lifespan is lowered.
 
