@@ -5,6 +5,7 @@ import com.t2pellet.strawgolem.events.ContainerClickHandler;
 import com.t2pellet.strawgolem.events.CropGrowthCallback;
 import com.t2pellet.strawgolem.events.CropGrowthHandler;
 import com.t2pellet.strawgolem.util.container.ContainerUtil;
+import com.t2pellet.tlib.Services;
 import com.t2pellet.tlib.TLibFabricMod;
 import com.t2pellet.tlib.TLibMod;
 import com.t2pellet.tlib.client.TLibModClient;
@@ -29,6 +30,9 @@ public class StrawgolemFabric extends TLibFabricMod {
         CropGrowthCallback.EVENT.register(CropGrowthHandler::onCropGrowth);
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
             if (ContainerUtil.isContainer(world, hitResult.getBlockPos())) {
+                if (Services.PLATFORM.isModLoaded("carryon")) {
+                    return InteractionResult.PASS;
+                }
                 return ContainerClickHandler.onContainerClicked(player, hitResult.getBlockPos());
             }
             return InteractionResult.PASS;
