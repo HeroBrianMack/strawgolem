@@ -2,6 +2,7 @@ package com.t2pellet.strawgolem.events;
 
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.strawgolem.entity.StrawGolemOrderer;
+import com.t2pellet.tlib.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
@@ -27,6 +28,7 @@ public class ContainerClickHandler {
             return InteractionResult.SUCCESS;
         }
         orderer.setOrderedGolem(null);
-        return InteractionResult.FAIL;
+        // Handling Carryon for both forge and fabric (has possible improvement)
+        return Services.PLATFORM.isModLoaded("carryon") ? InteractionResult.PASS : InteractionResult.FAIL;
     }
 }

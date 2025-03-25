@@ -30,9 +30,6 @@ public class StrawgolemFabric extends TLibFabricMod {
         CropGrowthCallback.EVENT.register(CropGrowthHandler::onCropGrowth);
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
             if (ContainerUtil.isContainer(world, hitResult.getBlockPos())) {
-                if (Services.PLATFORM.isModLoaded("carryon")) {
-                    return InteractionResult.PASS;
-                }
                 return ContainerClickHandler.onContainerClicked(player, hitResult.getBlockPos());
             }
             return InteractionResult.PASS;
