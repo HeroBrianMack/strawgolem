@@ -31,7 +31,7 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
 
     @Override
     public boolean canUse() {
-        if (golem.isStarving() || golem.getHeldItem().has()) return false;
+        if (golem.isStarving() || golem.getHeldItem().has() || golem.isHarvestProcessing()) return false;
         Optional<BlockPos> harvestPos = golem.getHarvester().startHarvest();
         if (harvestPos.isPresent()) {
             blockPos = harvestPos.get();
@@ -42,7 +42,7 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
 
     @Override
     public boolean canContinueToUse() {
-        return !golem.getHeldItem().has() && this.isValidTarget(this.mob.level(), this.blockPos);
+        return !golem.getHeldItem().has() && this.isValidTarget(this.mob.level(), this.blockPos) && !golem.isHarvestProcessing();
     }
 
     @Override
@@ -82,10 +82,12 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
                 golem.setPickingUpItem(true);
             }
             harvester.completeHarvest();
+            golem.setHarvestProcessing(true);
             Services.SIDE.scheduleServer(40, () -> {
                 harvester.findHarvestables();
                 golem.setPickingUpBlock(false);
                 golem.setPickingUpItem(false);
+                golem.setHarvestProcessing(false);
             });
         } else {
             if (this.shouldRecalculatePath()) {
