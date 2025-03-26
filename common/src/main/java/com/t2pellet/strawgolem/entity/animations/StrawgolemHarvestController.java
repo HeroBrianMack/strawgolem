@@ -2,6 +2,7 @@ package com.t2pellet.strawgolem.entity.animations;
 
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
+import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
@@ -13,15 +14,25 @@ public class StrawgolemHarvestController extends StrawgolemAnimationController {
 
     private static PlayState predicate(AnimationState<StrawGolem> event) {
         // Appropriate animation for regular crop or gourd crop
+        AnimationController<StrawGolem> controller = event.getController();
         if (event.getAnimatable().isPickingUpBlock()) {
+            // Should never be stopped if not picking up things...
+            if (controller.getAnimationState().equals(State.STOPPED)) {
+                System.out.println("RESET");
+                controller.forceAnimationReset();
+            }
             if (StrawgolemConfig.Visual.showHarvestBlockAnimation.get()) {
-                event.getController().setAnimation(HARVEST_BLOCK_ANIM);
-                return PlayState.CONTINUE;
+                System.out.println("harvest");
+                return event.setAndContinue(HARVEST_BLOCK_ANIM);
             }
         } else if (event.getAnimatable().isPickingUpItem()) {
+            if (controller.getAnimationState().equals(State.STOPPED)) {
+                System.out.println("RESET");
+                controller.forceAnimationReset();
+            }
             if (StrawgolemConfig.Visual.showHarvestItemAnimation.get()) {
-                event.getController().setAnimation(event.getAnimatable().hasBarrel() ? HARVEST_BLOCK_ANIM : HARVEST_ITEM_ANIM);
-                return PlayState.CONTINUE;
+                System.out.println("harvest Item");
+                return event.setAndContinue(event.getAnimatable().hasBarrel() ? HARVEST_BLOCK_ANIM : HARVEST_ITEM_ANIM);
             }
         }
         event.getController().forceAnimationReset();

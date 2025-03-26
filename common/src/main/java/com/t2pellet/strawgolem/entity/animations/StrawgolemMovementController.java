@@ -13,12 +13,25 @@ public class StrawgolemMovementController extends StrawgolemAnimationController 
 
     private static final AnimationStateHandler<StrawGolem> PREDICATE = event -> {
         StrawGolem golem = event.getAnimatable();
-        if (golem.isPickingUpBlock() || golem.isPickingUpItem()) return PlayState.STOP.STOP;
+        if (golem.isPickingUpBlock() || golem.isPickingUpItem()) return PlayState.STOP;
 
         AnimationController<StrawGolem> controller = event.getController();
-        if (golem.isRunning()) controller.setAnimation(LEGS_RUN_ANIM);
-        else if (golem.isMoving()) controller.setAnimation(LEGS_WALK_ANIM);
-        else controller.setAnimation(LEGS_IDLE_ANIM);
+        if (controller.getAnimationState().equals(State.STOPPED)) {
+            System.out.println("RESET");
+            controller.forceAnimationReset();
+        }
+        if (golem.isRunning()) {
+            System.out.println("RUN");
+            controller.setAnimation(LEGS_RUN_ANIM);
+        }
+        else if (golem.isMoving()) {
+            System.out.println("WALK");
+            controller.setAnimation(LEGS_WALK_ANIM);
+        }
+        else {
+            System.out.println("IDLE");
+            controller.setAnimation(LEGS_IDLE_ANIM);
+        }
 
         return PlayState.CONTINUE;
     };
