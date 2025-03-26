@@ -98,6 +98,8 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     private static final EntityDataAccessor<Integer> BARREL_HEALTH = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> HARVESTING_ITEM = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HARVESTING_BLOCK = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HARVEST_PROCESSING = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
+
     public static final double defaultMovement = 0.23;
     // Capabilities
     CapabilityManager capabilities = CapabilityManager.newInstance(this);
@@ -149,6 +151,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
         this.entityData.define(BARREL_HEALTH, 0);
         this.entityData.define(HARVESTING_ITEM, false);
         this.entityData.define(HARVESTING_BLOCK, false);
+        this.entityData.define(HARVEST_PROCESSING, false);
     }
 
     /* AI */
@@ -373,12 +376,20 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
         return entityData.get(HARVESTING_BLOCK);
     }
 
+    public boolean isHarvestProcessing() {
+        return entityData.get(HARVEST_PROCESSING);
+    }
+
     public void setPickingUpItem(boolean isPickingUpItem) {
         entityData.set(HARVESTING_ITEM, isPickingUpItem);
     }
 
     public void setPickingUpBlock(boolean isPickingUpBlock) {
         entityData.set(HARVESTING_BLOCK, isPickingUpBlock);
+    }
+
+    public void setHarvestProcessing(boolean harvesting) {
+        entityData.set(HARVEST_PROCESSING, harvesting);
     }
 
     public boolean isInCold() {
