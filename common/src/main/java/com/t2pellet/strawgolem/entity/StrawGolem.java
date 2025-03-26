@@ -70,7 +70,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     public static final Item FEED_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.feedItem.get()));
 
     public static final Item BARREL_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.barrelItem.get()));
-    private static final double WALK_DISTANCE = 0.00000001D;
+//    private static final double WALK_DISTANCE = 0.0000000001D;
     private static final double RUN_DISTANCE = 0.003D;
 
     // Synched Data
@@ -335,7 +335,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     }
 
     public boolean isMoving() {
-        return getSqrMovement() >= WALK_DISTANCE;
+        return getSqrMovement() != 0D;
     }
 
     public boolean isPickingUpItem() {
