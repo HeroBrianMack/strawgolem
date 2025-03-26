@@ -82,6 +82,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable, ICapabil
     public static final Item REPAIR_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
     public static final Item FEED_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.feedItem.get()));
 
+//    private static final double WALK_DISTANCE = 0.0000000001D;
 //    public static final Item BARREL_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.barrelItem.get()));
 public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, new ResourceLocation(StrawgolemConfig.Lifespan.barrelItem.get()));
 
@@ -183,14 +184,6 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     @Override
     public void baseTick() {
         super.baseTick();
-//        if (goalSelector.getRunningGoals().toArray().length != 0) {
-//            System.out.println("GOALS:");
-//            for (Object obj : goalSelector.getRunningGoals().toArray()) {
-//                if (obj instanceof WrappedGoal w)
-//                    System.out.print(" " + w.getGoal().getClass().getSimpleName());
-//            }
-//            System.out.println();
-//        }
         if (level().isClientSide) baseClientTick();
         else baseServerTick();
         baseCommonTick();
@@ -369,7 +362,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     }
 
     public boolean isMoving() {
-        return getSqrMovement() >= WALK_DISTANCE;
+        return getSqrMovement() != 0D;
     }
 
     public boolean isPickingUpItem() {
@@ -554,6 +547,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
         }
         return false;
     }
+
     private void updateValidItems() {
         if (validPickupItems != null) {
             return;

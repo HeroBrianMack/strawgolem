@@ -10,15 +10,10 @@ public class StrawgolemAnimationController extends AnimationController<StrawGole
         super(animatable, name, 4, animationPredicate);
     }
 
-    protected void setAnimation(@NotNull String animation) {
-        setAnimation(animation, Animation.LoopType.LOOP);
-    }
-
-    protected void setAnimation(@NotNull String animation, Animation.LoopType loopType) {
-        AnimationProcessor.QueuedAnimation current = getCurrentAnimation();
-        boolean isNewAnimation = current == null || !current.animation().name().equals(animation);
-        if (!animation.isEmpty() && isNewAnimation) {
-            RawAnimation.begin().then(animation, loopType);
+    // Forces a refresh if a controller is stopped
+    public static void refresh(AnimationController<StrawGolem> controller) {
+        if (controller.getAnimationState().equals(State.STOPPED)) {
+            controller.forceAnimationReset();
         }
     }
 }
