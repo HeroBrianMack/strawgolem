@@ -16,20 +16,14 @@ public class StrawgolemMovementController extends StrawgolemAnimationController 
         if (golem.isPickingUpBlock() || golem.isPickingUpItem()) return PlayState.STOP;
 
         AnimationController<StrawGolem> controller = event.getController();
-        if (controller.getAnimationState().equals(State.STOPPED)) {
-            System.out.println("RESET");
-            controller.forceAnimationReset();
-        }
+        refresh(controller);
         if (golem.isRunning()) {
-            System.out.println("RUN");
             controller.setAnimation(LEGS_RUN_ANIM);
         }
         else if (golem.isMoving()) {
-            System.out.println("WALK");
             controller.setAnimation(LEGS_WALK_ANIM);
         }
         else {
-            System.out.println("IDLE");
             controller.setAnimation(LEGS_IDLE_ANIM);
         }
 

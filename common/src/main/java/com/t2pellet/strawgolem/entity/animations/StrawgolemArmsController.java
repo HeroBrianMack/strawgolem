@@ -22,38 +22,24 @@ public class StrawgolemArmsController extends StrawgolemAnimationController {
 
         AnimationController<StrawGolem> controller = event.getController();
         // Should never be stopped if not picking up things...
-
-        if (controller.getAnimationState().equals(State.STOPPED)) {
-            System.out.println("RESET");
-            controller.forceAnimationReset();
-        }
+        refresh(controller);
         if (golem.isScared()) {
-            System.out.println("SCARED");
             controller.setAnimation(SCARED_ANIM);
         }
         else if (golem.shouldHoldAboveHead()) {
-            System.out.println("HOLD BLOCK");
             controller.setAnimation(HOLDING_BLOCK_ANIM);
         }
         else if (golem.getHeldItem().has()) {
-            System.out.println("HOLD ITEM");
-            if (!HOLDING_ITEM_ANIM.equals(controller.getCurrentRawAnimation())) {
-                System.out.println("AGH");
-//                controller.forceAnimationReset();
-            }
             controller.setAnimation(HOLDING_ITEM_ANIM);
 
         }
         else if (golem.isRunning()) {
-            System.out.println("RUN ARM");
             controller.setAnimation(RUN_ARMS_ANIM);
         }
         else if (golem.isMoving()) {
-            System.out.println("WALK ARM");
             controller.setAnimation(WALK_ARMS_ANIM);
         }
         else {
-            System.out.println("IDLE ARM");
             controller.setAnimation(IDLE_ANIM);
         }
 

@@ -17,21 +17,13 @@ public class StrawgolemHarvestController extends StrawgolemAnimationController {
         AnimationController<StrawGolem> controller = event.getController();
         if (event.getAnimatable().isPickingUpBlock()) {
             // Should never be stopped if not picking up things...
-            if (controller.getAnimationState().equals(State.STOPPED)) {
-                System.out.println("RESET");
-                controller.forceAnimationReset();
-            }
+            refresh(controller);
             if (StrawgolemConfig.Visual.showHarvestBlockAnimation.get()) {
-                System.out.println("harvest");
                 return event.setAndContinue(HARVEST_BLOCK_ANIM);
             }
         } else if (event.getAnimatable().isPickingUpItem()) {
-            if (controller.getAnimationState().equals(State.STOPPED)) {
-                System.out.println("RESET");
-                controller.forceAnimationReset();
-            }
+            refresh(controller);
             if (StrawgolemConfig.Visual.showHarvestItemAnimation.get()) {
-                System.out.println("harvest Item");
                 return event.setAndContinue(event.getAnimatable().hasBarrel() ? HARVEST_BLOCK_ANIM : HARVEST_ITEM_ANIM);
             }
         }
