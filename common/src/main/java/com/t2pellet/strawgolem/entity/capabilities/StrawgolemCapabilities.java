@@ -11,15 +11,15 @@ import com.t2pellet.haybalelib.entity.capability.api.registry.IModCapabilities;
 public class StrawgolemCapabilities implements IModCapabilities {
 
     @ICapability(Decay.class)
-    public static final TLibCapability<Decay> decay = new TLibCapability<>(Decay::getInstance);
+    public static final HaybaleLibCapability<Decay> decay = new HaybaleLibCapability<>(Decay::getInstance);
     @ICapability(Hunger.class)
-    public static final TLibCapability<Hunger> hunger = new TLibCapability<>(Hunger::getInstance);
+    public static final HaybaleLibCapability<Hunger> hunger = new HaybaleLibCapability<>(Hunger::getInstance);
     @ICapability(HeldItem.class)
-    public static final TLibCapability<HeldItem> heldItem = new TLibCapability<>(HeldItem::getInstance);
+    public static final HaybaleLibCapability<HeldItem> heldItem = new HaybaleLibCapability<>(HeldItem::getInstance);
     @ICapability(Harvester.class)
-    public static final TLibCapability<Harvester> harvester = new TLibCapability<>(Harvester::getInstance);
+    public static final HaybaleLibCapability<Harvester> harvester = new HaybaleLibCapability<>(Harvester::getInstance);
     @ICapability(Deliverer.class)
-    public static final TLibCapability<Deliverer> deliverer = new TLibCapability<>(Deliverer::getInstance);
+    public static final HaybaleLibCapability<Deliverer> deliverer = new HaybaleLibCapability<>(Deliverer::getInstance);
     @ICapability(Tether.class)
-    public static final TLibCapability<Tether> tether = new TLibCapability<>(Tether::getInstance);
+    public static final HaybaleLibCapability<Tether> tether = new HaybaleLibCapability<>(Tether::getInstance);
 }
