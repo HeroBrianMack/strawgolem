@@ -3,8 +3,8 @@ package com.t2pellet.strawgolem.client.registry;
 import com.t2pellet.strawgolem.client.renderer.StrawGolemRenderer;
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.strawgolem.registry.StrawgolemEntities;
-import com.t2pellet.tlib.client.registry.api.EntityRendererEntryType;
-import com.t2pellet.tlib.registry.api.RegistryClass;
+import com.t2pellet.haybalelib.client.registry.api.EntityRendererEntryType;
+import com.t2pellet.haybalelib.registry.api.RegistryClass;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
 @RegistryClass.IRegistryClass(EntityRendererProvider.class)

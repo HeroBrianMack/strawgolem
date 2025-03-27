@@ -1,8 +1,8 @@
 package com.t2pellet.strawgolem.registry;
 
 import com.t2pellet.strawgolem.entity.StrawGolem;
-import com.t2pellet.tlib.registry.api.EntityEntryType;
-import com.t2pellet.tlib.registry.api.RegistryClass;
+import com.t2pellet.haybalelib.registry.api.EntityEntryType;
+import com.t2pellet.haybalelib.registry.api.RegistryClass;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 

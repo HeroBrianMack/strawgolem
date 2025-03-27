@@ -6,7 +6,7 @@ import com.t2pellet.strawgolem.entity.capabilities.harvester.Harvester;
 import com.t2pellet.strawgolem.entity.capabilities.held_item.HeldItem;
 import com.t2pellet.strawgolem.entity.capabilities.hunger.Hunger;
 import com.t2pellet.strawgolem.entity.capabilities.tether.Tether;
-import com.t2pellet.tlib.entity.capability.api.registry.IModCapabilities;
+import com.t2pellet.haybalelib.entity.capability.api.registry.IModCapabilities;
 
 public class StrawgolemCapabilities implements IModCapabilities {
 

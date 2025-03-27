@@ -25,7 +25,7 @@ dependencies {
      compileOnly "curse.maven:animal-feeding-trough-445838:${project.feeding_trough_version}"
      compileOnly "curse.maven:jade-324717:${project.jade_api_id}"
      implementation("me.shedaniel.cloth:cloth-config-forge:${project.cloth_version}")
-     compileOnly "curse.maven:haybale-1-20-1-1092172:${project.tlib_common_version}"
+     compileOnly "curse.maven:haybale-1-20-1-1092172:${project.haybale_common_version}"
 }
 
 publishing {

@@ -5,23 +5,23 @@ import com.t2pellet.strawgolem.events.ContainerClickHandler;
 import com.t2pellet.strawgolem.events.CropGrowthCallback;
 import com.t2pellet.strawgolem.events.CropGrowthHandler;
 import com.t2pellet.strawgolem.util.container.ContainerUtil;
-import com.t2pellet.tlib.Services;
-import com.t2pellet.tlib.TLibFabricMod;
-import com.t2pellet.tlib.TLibMod;
-import com.t2pellet.tlib.client.TLibModClient;
+import com.t2pellet.haybalelib.Services;
+import com.t2pellet.haybalelib.HaybaleLibFabricMod;
+import com.t2pellet.haybalelib.HaybaleLibMod;
+import com.t2pellet.haybalelib.client.HaybaleLibModClient;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.world.InteractionResult;
 
-@TLibMod.IMod(Constants.MOD_ID)
-public class StrawgolemFabric extends TLibFabricMod {
+@HaybaleLibMod.IMod(Constants.MOD_ID)
+public class StrawgolemFabric extends HaybaleLibFabricMod {
 
     @Override
-    protected TLibMod getCommonMod() {
+    protected HaybaleLibMod getCommonMod() {
         return StrawgolemCommon.INSTANCE;
     }
 
     @Override
-    protected TLibModClient getClientMod() {
+    protected HaybaleLibModClient getClientMod() {
         return StrawgolemClient.INSTANCE;
     }
 

@@ -1,7 +1,7 @@
 package com.t2pellet.strawgolem;
 
-import com.t2pellet.tlib.config.api.Config;
-import com.t2pellet.tlib.config.api.property.*;
+import com.t2pellet.haybalelib.config.api.Config;
+import com.t2pellet.haybalelib.config.api.property.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;

@@ -2,8 +2,8 @@ package com.t2pellet.strawgolem.entity.capabilities.hunger;
 
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
-import com.t2pellet.tlib.entity.capability.api.AbstractCapability;
-import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
+import com.t2pellet.haybalelib.entity.capability.api.AbstractCapability;
+import com.t2pellet.haybalelib.entity.capability.api.ICapabilityHaver;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.LivingEntity;

@@ -2,7 +2,7 @@ package com.t2pellet.strawgolem.events;
 
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.strawgolem.entity.StrawGolemOrderer;
-import com.t2pellet.tlib.Services;
+import com.t2pellet.haybalelib.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;

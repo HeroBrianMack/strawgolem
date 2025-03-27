@@ -4,8 +4,8 @@ package com.t2pellet.strawgolem.client.registry;
 import com.t2pellet.strawgolem.client.particle.FlyParticle;
 import com.t2pellet.strawgolem.client.particle.FoodParticle;
 import com.t2pellet.strawgolem.registry.StrawgolemParticles;
-import com.t2pellet.tlib.client.registry.api.ParticleFactoryEntryType;
-import com.t2pellet.tlib.registry.api.RegistryClass;
+import com.t2pellet.haybalelib.client.registry.api.ParticleFactoryEntryType;
+import com.t2pellet.haybalelib.registry.api.RegistryClass;
 import net.minecraft.core.particles.ParticleType;
 
 @RegistryClass.IRegistryClass(ParticleType.class)

@@ -1,7 +1,7 @@
 package com.t2pellet.strawgolem.registry;
 
-import com.t2pellet.tlib.registry.api.ItemEntryType;
-import com.t2pellet.tlib.registry.api.RegistryClass;
+import com.t2pellet.haybalelib.registry.api.ItemEntryType;
+import com.t2pellet.haybalelib.registry.api.RegistryClass;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;

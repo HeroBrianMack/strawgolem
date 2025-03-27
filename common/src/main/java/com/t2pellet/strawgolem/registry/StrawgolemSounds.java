@@ -1,8 +1,8 @@
 package com.t2pellet.strawgolem.registry;
 
 
-import com.t2pellet.tlib.registry.api.RegistryClass;
-import com.t2pellet.tlib.registry.api.SoundEntryType;
+import com.t2pellet.haybalelib.registry.api.RegistryClass;
+import com.t2pellet.haybalelib.registry.api.SoundEntryType;
 import net.minecraft.sounds.SoundEvent;
 
 @RegistryClass.IRegistryClass(SoundEvent.class)
