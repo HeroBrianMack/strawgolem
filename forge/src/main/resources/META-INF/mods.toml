@@ -54,3 +54,8 @@ modId = "jade"
 mandatory = false
 versionRange = "*"
 side = "CLIENT"
+[[dependencies.strawgolem]]
+modId = "jei"
+mandatory = false
+versionRange = "*"
+side = "CLIENT"

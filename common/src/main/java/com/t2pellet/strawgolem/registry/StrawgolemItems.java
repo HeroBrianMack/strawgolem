@@ -2,9 +2,9 @@ package com.t2pellet.strawgolem.registry;
 
 import com.t2pellet.haybalelib.registry.api.ItemEntryType;
 import com.t2pellet.haybalelib.registry.api.RegistryClass;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.*;
 
 @RegistryClass.IRegistryClass(Item.class)
 public class StrawgolemItems implements RegistryClass {
@@ -15,4 +15,5 @@ public class StrawgolemItems implements RegistryClass {
 
     @IRegistryEntry
     public static final ItemEntryType strawHat = new ItemEntryType("straw_hat", strawHatProperties);
+
 }

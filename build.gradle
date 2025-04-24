@@ -65,6 +65,10 @@ subprojects {
         maven {
             url = "https://api.modrinth.com/maven"
         }
+        maven { // JEI fallback mirror
+            name = "ModMaven"
+            url = "https://modmaven.dev"
+        }
     }
 
     tasks.withType(JavaCompile).configureEach {
