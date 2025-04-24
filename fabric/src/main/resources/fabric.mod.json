@@ -34,14 +34,15 @@
         "fabric": "*",
         "minecraft": "1.20.1",
         "java": ">=17",
-        "haybale": "*",
+        "haybalelib": "*",
         "geckolib": "*"
     },
     "suggests": {
         "modmenu": "*",
         "cloth-config": "*",
         "jade": "*",
-        "animal_feeding_trough": "*"
+        "animal_feeding_trough": "*",
+        "jei": "*"
     }
 }
   

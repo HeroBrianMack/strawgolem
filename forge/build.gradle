@@ -84,6 +84,14 @@ dependencies {
     implementation fg.deobf("curse.maven:architectury-api-419699:${project.architectury_forge_id}")
     implementation("com.eliotlash.mclib:mclib:20")
     implementation fg.deobf("curse.maven:haybale-1-20-1-1092172:${project.haybale_forge_version}")
+    dependencies {
+    /* other minecraft dependencies are here */
+
+    // compile against the JEI API but do not include it at runtime
+    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"))
+    // at runtime, use the full JEI jar for Forge
+    runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
