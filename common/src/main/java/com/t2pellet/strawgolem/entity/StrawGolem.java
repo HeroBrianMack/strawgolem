@@ -33,17 +33,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.animal.Cow;
@@ -110,7 +108,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     private final Deliverer deliverer;
     private final Tether tether;
     public static final UUID movementSpeedUID = UUID.randomUUID();
-
+//    private GolemRotationControl bodyRotationControl;
     // Misc
     private boolean isFirstTick = true;
 
@@ -146,7 +144,6 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(IS_SCARED, false);
-//        this.entityData.define(IS_STARVING, false);
         this.entityData.define(HAS_HAT, false);
         this.entityData.define(BARREL_HEALTH, 0);
         this.entityData.define(HARVESTING_ITEM, false);
@@ -500,29 +497,62 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
         return StrawgolemSounds.GOLEM_DEATH.get();
     }
 
+    private boolean specialRotation = false;
     @Override
     public void aiStep() {
-        super.aiStep();
         this.level().getProfiler().push("looting");
         Vec3i vec3i = this.getPickupReach();
         Vec3 vec = new Vec3(vec3i.getX(), vec3i.getY(), vec3i.getZ());
-        vec = vec.scale(1.7D);
-        if (!this.level().isClientSide && this.isAlive() && !this.dead && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+        vec = vec.scale(1.0D);
+        if (!specialRotation && !this.level().isClientSide && this.isAlive() && !this.dead && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && !this.isPickingUpItem()) {
             for(ItemEntity itementity : this.level().getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(vec.x(), vec.y(), vec.z()))) {
-                if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && this.wantsToPickUp(itementity.getItem())) {
-                    this.setItemSlot(EquipmentSlot.MAINHAND, itementity.getItem());
-
-                    itementity.discard();
+                if (!specialRotation && !itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && this.wantsToPickUp(itementity.getItem()) && !this.isPickingUpItem()) {
+                    super.lookAt(itementity, 359, 359);
+                    specialRotation = true;
+                    itementity.setNeverPickUp();
+                    Services.SIDE.scheduleServer(5, () -> {
+                        this.setPickingUpItem(true);
+                        this.getAttributes().getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(0);
+                        specialRotation = false;
+                        Services.SIDE.scheduleServer(40, () -> {
+                            this.getHunger().getState().updateSpeed(this);
+                            System.out.println(itementity.getItem());
+                            this.setItemSlot(EquipmentSlot.MAINHAND, itementity.getItem());
+                            this.lookAt(itementity, 180, 180);
+                            itementity.discard();
+                            this.setPickingUpItem(false);
+                        });
+                    });
                 }
             }
         }
-
         this.level().getProfiler().pop();
+        super.aiStep();
+    }
+
+    class GolemBodyRotationControl extends BodyRotationControl {
+        public GolemBodyRotationControl(Mob mob) {
+            super(mob);
+        }
+
+        @Override
+        public void clientTick() {
+            if (specialRotation) {
+                StrawGolem.this.yHeadRot = StrawGolem.this.yBodyRot;
+                StrawGolem.this.yBodyRot = StrawGolem.this.getYRot();
+            } else {
+                super.clientTick();
+            }
+        }
+    }
+
+    @Override
+    protected BodyRotationControl createBodyControl() {
+        return new GolemBodyRotationControl(this);
     }
 
     @Override
     public boolean wantsToPickUp(ItemStack item) {
-
         return this.canHoldItem(item);
     }
 
