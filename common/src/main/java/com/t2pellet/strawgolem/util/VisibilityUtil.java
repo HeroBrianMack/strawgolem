@@ -32,12 +32,14 @@ public class VisibilityUtil {
         int distanceX = Math.abs(e.getBlockX() - block.getX());
         int distanceY = Math.abs(e.getBlockY() - block.getY());
         int distanceZ = Math.abs(e.getBlockZ() - block.getZ());
+        int dist = block.distManhattan(e.blockPosition());
         // If block is within harvest range front/back/left/right
         // and within 2 above or below, the golem should see it.
-        if (distanceX > StrawgolemConfig.Harvesting.harvestRange.get() || distanceY > 3 || distanceZ > StrawgolemConfig.Harvesting.harvestRange.get()) {
-            return false;
-        }
-        return true;
+        return dist < StrawgolemConfig.Harvesting.harvestRange.get() && distanceY < 3;
+//        if (distanceX > StrawgolemConfig.Harvesting.harvestRange.get() || distanceY > 3 || distanceZ > StrawgolemConfig.Harvesting.harvestRange.get()) {
+//            return false;
+//        }
+//        return true;
 
     }
 
