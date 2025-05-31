@@ -108,7 +108,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     private final Deliverer deliverer;
     private final Tether tether;
     public static final UUID movementSpeedUID = UUID.randomUUID();
-//    private GolemRotationControl bodyRotationControl;
+
     // Misc
     private boolean isFirstTick = true;
 
