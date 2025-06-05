@@ -14,7 +14,6 @@ public interface Hunger extends Capability {
     }
 
     void hunger(StrawGolem golem);
-    void setFromHealth();
 
     boolean feed(StrawGolem golem);
 

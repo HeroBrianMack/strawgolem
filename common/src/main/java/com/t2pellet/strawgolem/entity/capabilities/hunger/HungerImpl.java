@@ -27,31 +27,19 @@ public class HungerImpl <E extends LivingEntity & ICapabilityHaver> extends Abst
                 state = HungerState.fromValue(state.getValue() + 1);
             }
         }
-        updateSpeedFromState(true, golem);
+        state.updateSpeed(golem);
         if (golem.isAlive()) {
             synchronize();
         }
     }
 
     @Override
-    public void setFromHealth() {
-
-    }
-
-    @Override
     public boolean feed(StrawGolem golem) {
         if (state == HungerState.FULL) return false;
-            state = HungerState.fromValue(state.getValue() - 1);
-            updateSpeedFromState(true, golem);
+        state = HungerState.fromValue(state.getValue() - 1);
+        state.updateSpeed(golem);
         synchronize();
         return true;
-    }
-
-    private void updateSpeedFromState(boolean shouldUpdate, StrawGolem golem) {
-        state.updateSpeed(golem);
-
-//        entity.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(speed);
-//        if (shouldUpdate /*|| entity.getSpeed() > speed*/) entity.setSpeed(speed);
     }
 
     @Override

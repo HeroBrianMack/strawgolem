@@ -133,6 +133,8 @@ public class StrawgolemConfig extends Config {
         public static final StringProperty pickupPresets = new StringProperty("None");
         @Entry(comment = "The type of items the golem should pick up (see Block Tags)")
         public static final StringProperty pickupType = new StringProperty("crops");
+        @Entry(comment = "Should golems feed themselves the apples (or the configured food item) they're holding when hungry? (Requires golemPickup to be set to true)")
+        public static final BoolProperty golemSelfFeed = new BoolProperty(false);
 
     }
     private static ListProperty<String> createBlockIDList() {

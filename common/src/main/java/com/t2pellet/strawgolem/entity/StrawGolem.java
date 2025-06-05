@@ -239,6 +239,17 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
         }
     }
 
+
+    private void feedGolem(ItemStack item) {
+        boolean success = hunger.feed(this);
+        if (success) {
+            spawnHappyParticle();
+            item.shrink(1);
+            playSound(StrawgolemSounds.GOLEM_HEAL.get());
+            spawnFoodParticle();
+        }
+    }
+
     @Override
     protected @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand) {
         if (level().isClientSide) {
@@ -254,14 +265,9 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
             }
             return InteractionResult.SUCCESS;
         } else if(item.getItem() == FEED_ITEM && hunger.getState() != HungerState.FULL) {
-            boolean success = hunger.feed(this);
-            if (success) {
-                spawnHappyParticle();
-                item.shrink(1);
-                playSound(StrawgolemSounds.GOLEM_HEAL.get());
-            }
+            feedGolem(item);
             return InteractionResult.SUCCESS;
-        }else if (item.getItem() == StrawgolemItems.strawHat.get() && !hasHat()) {
+        } else if (item.getItem() == StrawgolemItems.strawHat.get() && !hasHat()) {
             this.entityData.set(HAS_HAT, true);
             item.shrink(1);
             return InteractionResult.SUCCESS;
@@ -529,9 +535,15 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
                         Services.SIDE.scheduleServer(40, () -> {
                             fixSpeed = false;
                             this.getHunger().getState().updateSpeed(this);
-                            System.out.println(itementity.getItem());
-                            this.setItemSlot(EquipmentSlot.MAINHAND, itementity.getItem());
-                            this.lookAt(itementity, 180, 180);
+                            ItemStack itemStack = itementity.getItem();
+                            if (StrawgolemConfig.Experimental.golemSelfFeed.get() && itementity.getItem().is(FEED_ITEM)) {
+                                while (hunger.getState() != HungerState.FULL && !itemStack.isEmpty()) {
+                                    feedGolem(itemStack);
+                                }
+                            }
+                            if (!itemStack.isEmpty()) {
+                                this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
+                            }
                             itementity.discard();
                             this.setPickingUpItem(false);
                         });
