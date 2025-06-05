@@ -43,7 +43,12 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         Optional<BlockPos> cachedPos = closestRememberedValidDeliverable();
 
         if (!cachedPos.isPresent() || !VisibilityUtil.isNearby(entity, cachedPos.get())) {
-            return findClosestDeliverable(entity.blockPosition());
+            BlockPos pos = findClosestDeliverable(entity.blockPosition());
+            if (priorityContainer == null) {
+                System.out.println(pos);
+                priorityContainer = pos;
+            }
+            return pos;
         }
         return cachedPos.get();
 
@@ -54,7 +59,9 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         if (!entity.level().dimension().location().equals(level)) {
             clearData();
         }
+        System.out.println(entity.level().getBlockEntity(pos).getBlockState().getBlock());
         if (ContainerUtil.isContainer(entity.level(), pos)) {
+            System.out.println("hi");
             if (!containerSet.contains(pos)) {
                 containerSet.add(pos);
             }
@@ -125,9 +132,9 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
                 }
             }
         }
-//        System.out.println("CLOSEST " + closest + " " + query);
         return closest;
     }
+
 
     @Override
     public void addInvalidPos(BlockPos pos) {
