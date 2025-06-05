@@ -108,7 +108,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     private final Deliverer deliverer;
     private final Tether tether;
     public static final UUID movementSpeedUID = UUID.randomUUID();
-
+    private boolean fixSpeed;
     // Misc
     private boolean isFirstTick = true;
 
@@ -389,6 +389,10 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
         entityData.set(HARVEST_PROCESSING, harvesting);
     }
 
+    public void setSpecialRotation(boolean specialRotation) {
+        this.specialRotation = specialRotation;
+    }
+
     public boolean isInCold() {
         return level().getBiome(blockPosition()).value().getBaseTemperature() < 0.15F;
     }
@@ -465,6 +469,10 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        // Checking if golem speed needs fixed
+        if (tag.getBoolean("fixSpeed")) {
+            this.getHunger().getState().updateSpeed(this);
+        }
         // Hat!
         this.entityData.set(HAS_HAT, tag.getBoolean("hasHat"));
         // Barrel!
@@ -475,6 +483,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     public void addAdditionalSaveData(CompoundTag tag) {
         tag.putBoolean("hasHat", this.hasHat());
         tag.putInt("barrelHealth", this.entityData.get(BARREL_HEALTH));
+        tag.putBoolean("fixSpeed", fixSpeed);
         super.addAdditionalSaveData(tag);
     }
 
@@ -508,13 +517,17 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
             for(ItemEntity itementity : this.level().getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(vec.x(), vec.y(), vec.z()))) {
                 if (!specialRotation && !itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && this.wantsToPickUp(itementity.getItem()) && !this.isPickingUpItem()) {
                     super.lookAt(itementity, 359, 359);
+                    // Intentionally setting this early
                     specialRotation = true;
-                    itementity.setNeverPickUp();
+                    itementity.setPickUpDelay(50);
                     Services.SIDE.scheduleServer(5, () -> {
+                        fixSpeed = true;
                         this.setPickingUpItem(true);
                         this.getAttributes().getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(0);
                         specialRotation = false;
+                        // Future Work: Possibly add a check to see if item within range
                         Services.SIDE.scheduleServer(40, () -> {
+                            fixSpeed = false;
                             this.getHunger().getState().updateSpeed(this);
                             System.out.println(itementity.getItem());
                             this.setItemSlot(EquipmentSlot.MAINHAND, itementity.getItem());
@@ -678,5 +691,4 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
         double z = random.nextFloat() + pos.z - 0.5F;
         level().addParticle(ParticleTypes.HAPPY_VILLAGER, x, pos.y + 0.85F, z, movement.x, movement.y, movement.z);
     }
-
 }
