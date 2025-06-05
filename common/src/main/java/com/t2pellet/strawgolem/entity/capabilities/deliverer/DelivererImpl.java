@@ -1,5 +1,6 @@
 package com.t2pellet.strawgolem.entity.capabilities.deliverer;
 
+import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.util.VisibilityUtil;
 import com.t2pellet.strawgolem.util.container.ContainerUtil;
 import com.t2pellet.haybalelib.entity.capability.api.AbstractCapability;
@@ -40,7 +41,16 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
             clearData();
         }
         Optional<BlockPos> cachedPos = closestRememberedValidDeliverable();
-        return cachedPos.orElseGet(() -> scanForDeliverable(entity.blockPosition()));
+
+        if (!cachedPos.isPresent() || !VisibilityUtil.isNearby(entity, cachedPos.get())) {
+            BlockPos pos = findClosestDeliverable(entity.blockPosition());
+            if (priorityContainer == null) {
+                priorityContainer = pos;
+            }
+            return pos;
+        }
+        return cachedPos.get();
+
     }
 
     @Override
@@ -85,9 +95,10 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
     }
 
     private BlockPos scanForDeliverable(BlockPos query) {
-        for (int x = -24; x <= 24; ++x) {
-            for (int y = -12; y <= 12; ++y) {
-                for (int z = -24; z <= 24; ++z) {
+        int range = StrawgolemConfig.Harvesting.harvestRange.get();
+        for (int x = -range; x <= range; ++x) {
+            for (int y = -range / 2; y <= range / 2; ++y) {
+                for (int z = -range; z <= range; ++z) {
                     BlockPos pos = query.offset(x, y, z);
                     if (ContainerUtil.isContainer(entity.level(), pos)
                             && VisibilityUtil.canSee(entity, pos)
@@ -100,6 +111,27 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         }
         return null;
     }
+
+    private BlockPos findClosestDeliverable(BlockPos query) {
+        int range = StrawgolemConfig.Harvesting.harvestRange.get();
+        BlockPos closest = null;
+        for (int x = -range; x <= range; ++x) {
+            for (int y = -range / 2; y <= range / 2; ++y) {
+                for (int z = -range; z <= range; ++z) {
+                    BlockPos pos = query.offset(x, y, z);
+                    if (ContainerUtil.isContainer(entity.level(), pos)
+                            && VisibilityUtil.canSee(entity, pos)
+                            && !invalidContainers.contains(pos)) {
+                        // Should find the closest deliverable...
+                        closest = closest == null || query.distManhattan(pos) < query.distManhattan(closest) ? pos : closest;
+                        containerSet.add(pos);
+                    }
+                }
+            }
+        }
+        return closest;
+    }
+
 
     @Override
     public void addInvalidPos(BlockPos pos) {
