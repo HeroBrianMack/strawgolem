@@ -74,21 +74,26 @@ public class HarvestCropGoal extends GolemMoveGoal<Harvester> {
         }
 
         if (withinDistance(targetPos) || withinDistance(below)) {
-            Harvester harvester = golem.getHarvester();
-            golem.getNavigation().stop();
-            if (harvester.isHarvestingBlock()) {
-                golem.setPickingUpBlock(true);
-            } else {
-                golem.setPickingUpItem(true);
-            }
-            harvester.completeHarvest();
-            golem.setHarvestProcessing(true);
-            Services.SIDE.scheduleServer(40, () -> {
-                harvester.findHarvestables();
-                golem.setPickingUpBlock(false);
-                golem.setPickingUpItem(false);
-                golem.setHarvestProcessing(false);
-            });
+            golem.getLookControl().setLookAt(targetPos.getCenter());
+            golem.setSpecialRotation(true);
+            Services.SIDE.scheduleServer(5, () -> {
+                golem.setHarvestProcessing(true);
+                golem.setSpecialRotation(false);
+                Harvester harvester = golem.getHarvester();
+                golem.getNavigation().stop();
+                if (harvester.isHarvestingBlock()) {
+                    golem.setPickingUpBlock(true);
+                } else {
+                    golem.setPickingUpItem(true);
+                }
+                harvester.completeHarvest();
+                Services.SIDE.scheduleServer(40, () -> {
+                    harvester.findHarvestables();
+                    golem.setPickingUpBlock(false);
+                    golem.setPickingUpItem(false);
+                    golem.setHarvestProcessing(false);
+                });}
+            );
         } else {
             if (this.shouldRecalculatePath()) {
                 if(!golemCollision()) {
