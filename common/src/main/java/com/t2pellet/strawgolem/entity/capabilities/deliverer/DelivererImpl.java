@@ -45,7 +45,6 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         if (!cachedPos.isPresent() || !VisibilityUtil.isNearby(entity, cachedPos.get())) {
             BlockPos pos = findClosestDeliverable(entity.blockPosition());
             if (priorityContainer == null) {
-                System.out.println(pos);
                 priorityContainer = pos;
             }
             return pos;
@@ -59,9 +58,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         if (!entity.level().dimension().location().equals(level)) {
             clearData();
         }
-        System.out.println(entity.level().getBlockEntity(pos).getBlockState().getBlock());
         if (ContainerUtil.isContainer(entity.level(), pos)) {
-            System.out.println("hi");
             if (!containerSet.contains(pos)) {
                 containerSet.add(pos);
             }

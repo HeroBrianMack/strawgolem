@@ -256,7 +256,6 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
         if (level().isClientSide) {
             return InteractionResult.PASS;
         }
-        System.out.println(deliverer.hasPriorityPos());
         ItemStack item = player.getItemInHand(hand);
         if (item.getItem() == REPAIR_ITEM && decay.getState() != DecayState.NEW) {
             boolean success = decay.repair();
