@@ -26,17 +26,12 @@ public class StrawgolemGeoModel extends GeoModel<StrawGolem> {
 
 
     @Override
-    public ResourceLocation getModelResource(StrawGolem golem, GeoRenderer<StrawGolem> renderer) {
+    public ResourceLocation getModelResource(StrawGolem golem) {
         return modelResource;
     }
 
     @Override
-    public ResourceLocation getModelResource(StrawGolem golem) {
-        return getModelResource(golem, null);
-    }
-
-    @Override
-    public ResourceLocation getTextureResource(StrawGolem golem, GeoRenderer<StrawGolem> renderer) {
+    public ResourceLocation getTextureResource(StrawGolem golem) {
         if (!StrawgolemConfig.Visual.golemDecayingTexture.get()) return newTextureResource;
 
         DecayState state = golem.getDecay().getState();
@@ -51,11 +46,6 @@ public class StrawgolemGeoModel extends GeoModel<StrawGolem> {
                 return dyingTextureResource;
             }
         }
-    }
-
-    @Override
-    public ResourceLocation getTextureResource(StrawGolem golem) {
-        return getTextureResource(golem, null);
     }
 
 

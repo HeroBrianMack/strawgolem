@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -63,7 +64,7 @@ public class CarvedPumpkinMixin {
             level.addFreshEntity(strawGolem);
 
             // Summon trigger & recipe unlock
-            Optional<? extends Recipe<?>> recipe = level.getServer().getRecipeManager().byKey(new ResourceLocation(Constants.MOD_ID, "straw_hat"));
+            Optional<RecipeHolder<?>> recipe = level.getServer().getRecipeManager().byKey(new ResourceLocation(Constants.MOD_ID, "straw_hat"));
             for(ServerPlayer serverplayer : level.getEntitiesOfClass(ServerPlayer.class, strawGolem.getBoundingBox().inflate(5.0D))) {
                 CriteriaTriggers.SUMMONED_ENTITY.trigger(serverplayer, strawGolem);
                 recipe.ifPresent(r -> serverplayer.getRecipeBook().add(r));

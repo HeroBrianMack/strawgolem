@@ -1,0 +1,83 @@
+plugins {
+    id 'idea'
+    id 'maven-publish'
+    id 'net.neoforged.gradle.userdev' version '7.0.145'
+    id 'java-library'
+}
+base {
+    archivesName = "${mod_name}-neoforge-${minecraft_version}"
+}
+
+jarJar.enable()
+java.withSourcesJar()
+apply from: 'https://gist.githubusercontent.com/Technici4n/facbcdf18ce1a556b76e6027180c32ce/raw/059ab3d504a590461746fc6e3065159f4932a960/classremapper.gradle'
+
+if (file('src/main/resources/META-INF/accesstransformer.cfg').exists()) {
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+}
+runs {
+    configureEach {
+        modSource project.sourceSets.main
+    }
+    client {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+    }
+    server {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        programArgument '--nogui'
+    }
+
+    gameTestServer {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+    }
+
+    data {
+        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
+
+sourceSets.main.resources.srcDir 'src/generated/resources'
+
+dependencies {
+    implementation("net.neoforged:neoforge:${neo_version}")
+    compileOnly project(":common")
+    implementation ("me.shedaniel.cloth:cloth-config-neoforgeforge:${project.cloth_version}")
+    implementation ("software.bernie.geckolib:geckolib-neoforge-{$project.minecraft_version}:${project.geckolib_version_neo}")
+    implementation ("me.shedaniel.cloth:cloth-config-neoforge:${project.cloth_version}")
+    implementation ("curse.maven:jade-324717:${project.jade_neo_id}")
+//    implementation ("curse.maven:farmers-delight-398521:${project.farmers_delight_neo_version}")
+    implementation ("curse.maven:animal-feeding-trough-445838:${project.feeding_trough_neo_version}")
+    implementation ("curse.maven:architectury-api-419699:$project.architectury_neo_id}")
+    implementation("com.eliotlash.mclib:mclib:20")
+    implementation("curse.maven:haybale-1-20-1-1092172:${project.haybale_neo_version}")
+}
+//tasks.named('jar', Jar) {
+//    // If you want the main JAR to be the shaded one for distribution
+//    from shadowJar.archiveFile
+//    dependsOn shadowJar
+//}
+
+
+Spec<Task> notNeoTask = { Task it -> !it.name.startsWith("neo") } as Spec<Task>
+
+tasks.withType(JavaCompile).matching(notNeoTask).configureEach {
+    source(project(":common").sourceSets.main.allSource)
+}
+tasks.withType(Javadoc).matching(notNeoTask).configureEach {
+    source(project(":common").sourceSets.main.allJava)
+}
+tasks.named("sourcesJar", Jar) {
+    from(project(":common").sourceSets.main.allSource)
+}
+tasks.withType(ProcessResources).matching(notNeoTask).configureEach {
+    from project(":common").sourceSets.main.resources
+}
+
+jar {
+    archiveClassifier = 'slim'
+//    finalizedBy 'remapJar'
+}
+tasks.named('jarJar') {
+    archiveClassifier = ''
+}
+

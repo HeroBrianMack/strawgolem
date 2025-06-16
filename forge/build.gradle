@@ -1,8 +1,8 @@
 plugins {
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle'
-    id 'org.spongepowered.mixin'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id("org.spongepowered.mixin") version "0.7-SNAPSHOT"
 }
 base {
     archivesName = "${mod_name}-forge-${minecraft_version}"
@@ -76,10 +76,10 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly project(":common")
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${project.geckolib_version_forge}")
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-{$project.minecraft_version}:${project.geckolib_version_forge}")
     implementation ("me.shedaniel.cloth:cloth-config-forge:${project.cloth_version}")
     implementation fg.deobf("curse.maven:jade-324717:${project.jade_forge_id}")
-    implementation fg.deobf("curse.maven:farmers-delight-398521:${project.farmers_delight_forge_version}")
+//    implementation fg.deobf("curse.maven:farmers-delight-398521:${project.farmers_delight_forge_version}")
     implementation fg.deobf("curse.maven:animal-feeding-trough-445838:${project.feeding_trough_forge_version}")
     implementation fg.deobf("curse.maven:architectury-api-419699:${project.architectury_forge_id}")
     implementation("com.eliotlash.mclib:mclib:20")
