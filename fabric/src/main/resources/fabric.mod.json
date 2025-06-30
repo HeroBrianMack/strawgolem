@@ -1,17 +1,17 @@
 {
     "schemaVersion": 1,
-    "id": "strawgolem",
+    "id": "${mod_id}",
     "version": "${version}",
-    "name": "Strawgolem",
-    "description": "Adds a helpful lil' Straw Golem. He's a farmer!",
+    "name": "${mod_name}",
+    "description": "${description}",
     "authors": [
-        "${mod_author}"
+        "${authors}"
     ],
     "contact": {
         "homepage": "https://www.curseforge.com/minecraft/mc-mods/strawgolem-reborn",
         "sources": "https://github.com/t2pellet/strawgolem"
     },
-    "license": "CC0-1.0",
+    "license": "${license}",
     "icon": "assets/strawgolem/icon.png",
     "environment": "*",
     "entrypoints": {
@@ -30,9 +30,9 @@
         "strawgolem.fabric.mixins.json"
     ],
     "depends": {
-        "fabricloader": ">=0.15",
+        "fabricloader": ">=${fabric_loader_min}",
         "fabric": "*",
-        "minecraft": "1.20.1",
+        "minecraft": "${minecraft_version}",
         "java": ">=17",
         "haybalelib": "*",
         "geckolib": "*"

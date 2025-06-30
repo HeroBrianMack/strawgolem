@@ -17,11 +17,11 @@ subprojects {
         manifest {
             attributes([
                 'Specification-Title'     : mod_name,
-                'Specification-Vendor'    : mod_author,
+                'Specification-Vendor'    : authors,
                 'Specification-Version'   : project.jar.archiveVersion,
                 'Implementation-Title'    : project.name,
                 'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'   : mod_author,
+                'Implementation-Vendor'   : authors,
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 'Timestamp'               : System.currentTimeMillis(),
                 'Built-On-Java'           : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
@@ -83,9 +83,19 @@ subprojects {
     }
 
     processResources {
-        filesMatching(['pack.mcmeta', 'fabric.mod.json', 'mods.toml', '*.mixins.json']) {
-            expand project.properties
+        Map<String, ?> expandProps = new HashMap<>()
+//        project.properties.each{ key, value ->
+//            expandProps.put(key, value);
+//        }
+        project.properties.each{ key, value ->
+            if (value instanceof String || value instanceof Number || value instanceof Boolean) {
+                expandProps.put(key, value)
+            }
         }
+        filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', '*.mixins.json']) {
+            expand(expandProps)
+        }
+        inputs.properties(expandProps)
     }
 
     // Disables Gradle's custom module metadata from being published to maven. The
