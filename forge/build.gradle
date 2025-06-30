@@ -76,7 +76,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly project(":common")
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-{$project.minecraft_version}:${project.geckolib_version_forge}")
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${project.minecraft_version}:${project.geckolib_version_forge}")
     implementation ("me.shedaniel.cloth:cloth-config-forge:${project.cloth_version}")
     implementation fg.deobf("curse.maven:jade-324717:${project.jade_forge_id}")
 //    implementation fg.deobf("curse.maven:farmers-delight-398521:${project.farmers_delight_forge_version}")
