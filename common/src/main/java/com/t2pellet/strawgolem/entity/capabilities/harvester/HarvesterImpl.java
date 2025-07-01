@@ -32,6 +32,7 @@ import java.util.*;
 class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapability<E> implements Harvester {
 
     private final Deque<BlockPos> harvestQueue = new ArrayDeque<>();
+
     private BlockPos currentHarvestPos = null;
     private final Set<BlockPos> invalidPos = new HashSet<>();
 

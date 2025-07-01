@@ -14,6 +14,7 @@ import com.t2pellet.strawgolem.entity.capabilities.hunger.Hunger;
 import com.t2pellet.strawgolem.entity.capabilities.hunger.HungerState;
 import com.t2pellet.strawgolem.entity.capabilities.tether.Tether;
 import com.t2pellet.strawgolem.entity.goals.golem.*;
+import com.t2pellet.strawgolem.mixin.methods.FruitGetter;
 import com.t2pellet.strawgolem.registry.StrawgolemItems;
 import com.t2pellet.strawgolem.registry.StrawgolemParticles;
 import com.t2pellet.strawgolem.registry.StrawgolemSounds;
@@ -652,8 +653,8 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
                             validPickupItems.add(drop.getItem());
                         }
                     }
-                } else if (b.value() instanceof StemBlock stem) {
-                    validPickupItems.add(stem.getFruit().asItem());
+                } else if (b.value() instanceof FruitGetter stem) {
+                    validPickupItems.add(BuiltInRegistries.BLOCK.get(stem.getFruit()).asItem());
                 }
             }
         }
