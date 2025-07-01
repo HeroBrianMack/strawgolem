@@ -9,6 +9,7 @@ import com.t2pellet.haybalelib.HaybaleLibNeoMod;
 import com.t2pellet.haybalelib.HaybaleLibMod;
 import com.t2pellet.haybalelib.client.HaybaleLibModClient;
 import net.minecraft.server.level.ServerLevel;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.fml.common.Mod;
@@ -18,7 +19,11 @@ import java.util.function.Consumer;
 
 @Mod(Constants.MOD_ID)
 @HaybaleLibMod.IMod(Constants.MOD_ID)
-public class StrawgolemForge extends HaybaleLibNeoMod {
+public class StrawgolemNeoForge extends HaybaleLibNeoMod {
+
+    public StrawgolemNeoForge(IEventBus bus) {
+        super(bus);
+    }
 
     @Override
     protected HaybaleLibMod getCommonMod() {

@@ -1,12 +1,12 @@
 package com.t2pellet.strawgolem.entity.capabilities.harvester;
 
+import com.t2pellet.haybalelib.Services;
+import com.t2pellet.haybalelib.entity.capability.api.AbstractCapability;
+import com.t2pellet.haybalelib.entity.capability.api.ICapabilityHaver;
 import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.util.VisibilityUtil;
 import com.t2pellet.strawgolem.util.crop.CropUtil;
 import com.t2pellet.strawgolem.util.crop.SeedUtil;
-import com.t2pellet.haybalelib.Services;
-import com.t2pellet.haybalelib.entity.capability.api.AbstractCapability;
-import com.t2pellet.haybalelib.entity.capability.api.ICapabilityHaver;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -18,7 +18,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -76,7 +75,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
 
     @Override
     public boolean isHarvestingBlock() {
-        return isHarvesting() && entity.level().getBlockState(currentHarvestPos).getBlock() instanceof StemGrownBlock;
+        return isHarvesting() && CropUtil.isStemGrownBlock(entity.level(), currentHarvestPos);
     }
 
     @Override
@@ -150,18 +149,18 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
     private void harvestBlock() {
         if (!entity.level().isClientSide && isHarvesting() && CropUtil.isGrownCrop(entity.level(), currentHarvestPos)) {
             BlockState state = entity.level().getBlockState(currentHarvestPos);
-            BlockState newState = state.getBlock() instanceof StemGrownBlock ? Blocks.AIR.defaultBlockState() : state.getBlock().defaultBlockState();
+            BlockState newState = CropUtil.isCrop(entity.level(), currentHarvestPos) ? Blocks.AIR.defaultBlockState() : state.getBlock().defaultBlockState();
             BlockState defaultState = state.getBlock().defaultBlockState();
             entity.setItemSlot(EquipmentSlot.MAINHAND, pickupLoot(state));
             // Experimental Version: Resets the age back to default, maintains all other properties
-            if (!(state.getBlock() instanceof StemGrownBlock) && StrawgolemConfig.Experimental.experimentalHarvesting.get()) {
+            if (CropUtil.isStemGrownBlock(entity.level(), currentHarvestPos) && StrawgolemConfig.Experimental.experimentalHarvesting.get()) {
                 newState = state;
                 for (Property<?> prop : defaultState.getProperties()) {
                     if (prop instanceof IntegerProperty intProp && prop.getName().equals("age")) {
                         newState = newState.setValue(intProp, defaultState.getValue(intProp));
                     }
                 }
-            } else if (!(state.getBlock() instanceof StemGrownBlock)){ // Hard coded, but can guaranteed solve problems if aware of them.
+            } else if (CropUtil.isStemGrownBlock(entity.level(), currentHarvestPos)) { // Hard coded, but can guaranteed solve problems if aware of them.
                 newState = defaultState;
                 // Overly coded, will modify for future issues or scrap if experimental works
                 if (state.hasProperty(BooleanProperty.create("ropelogged"))) {
@@ -180,10 +179,10 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
     }
 
     private ItemStack pickupLoot(BlockState state) {
-        if (state.getBlock() instanceof StemGrownBlock) return new ItemStack(state.getBlock().asItem(), 1);
+        if (CropUtil.isStemGrownBlock(entity.level(), currentHarvestPos)) return new ItemStack(state.getBlock().asItem(), 1);
         LootParams.Builder builder = new LootParams.Builder((ServerLevel) entity.level()).withParameter(LootContextParams.TOOL, ItemStack.EMPTY).withParameter(LootContextParams.ORIGIN, entity.position());
         List<ItemStack> drops = state.getDrops(builder);
-        Optional<ItemStack> pickupStack = drops.stream().filter((d) -> !SeedUtil.isSeed(d) || d.getItem().isEdible()).findFirst();
+        Optional<ItemStack> pickupStack = drops.stream().filter((d) -> !SeedUtil.isSeed(d, entity.level(), currentHarvestPos) || d.getItem().isEdible()).findFirst();
         return pickupStack.orElse(ItemStack.EMPTY);
     }
 }

@@ -15,7 +15,7 @@ public class StemBlockMixin implements FruitGetter {
     private ResourceKey<Block> fruit;
 
     @Override
-    public ResourceKey<Block> getFruit() {
+    public ResourceKey<Block> golemGetFruit() {
         return fruit;
     }
 }

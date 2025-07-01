@@ -4,5 +4,5 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
 
 public interface FruitGetter {
-    public ResourceKey<Block> getFruit();
+    public ResourceKey<Block> golemGetFruit();
 }

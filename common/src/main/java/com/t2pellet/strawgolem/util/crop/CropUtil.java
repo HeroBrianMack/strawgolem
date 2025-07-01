@@ -6,19 +6,19 @@ import com.t2pellet.strawgolem.compat.api.HarvestableBlock;
 import com.t2pellet.strawgolem.compat.api.HarvestableState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.AttachedStemBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
-import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,14 +43,14 @@ public class CropUtil {
     }
 
     public static boolean isCrop(LevelAccessor level, BlockPos pos) {
-        return pos != null && isCrop(level.getBlockState(pos));
+        return pos != null && isCrop(level.getBlockState(pos), level, pos);
     }
 
     public static boolean isGrownCrop(LevelAccessor level, BlockPos pos) {
         if (pos == null) return false;
 
         BlockState state = level.getBlockState(pos);
-        if (!isCrop(state)) return false;
+        if (!isCrop(level, pos)) return false;
 
         if (state.getBlock() instanceof CropBlock cropBlock) {
             return cropBlock.isMaxAge(state);
@@ -58,15 +58,16 @@ public class CropUtil {
             return cropBlock.isMaxAge(state);
         } else if (state instanceof HarvestableState cropBlock) {
             return cropBlock.isMaxAge();
-        } else if (state.getBlock() instanceof StemGrownBlock) {
+        } else if (state.getBlock() != Blocks.AIR){
             for (Direction direction : Direction.values()) {
                 if (isValidStem(level, pos.offset(direction.getNormal()), direction.getOpposite())) {
                     return true;
                 }
             }
-            return false;
+            if (state.getBlock().equals(Blocks.PUMPKIN) || state.getBlock().equals(Blocks.MELON)) {
+                return false;
+            }
         }
-
         boolean whitelistedCrop = StrawgolemConfig.Harvesting.enableWhitelist.get() && isWhitelisted(state.getBlock());
         if (state.is(HARVESTABLE_CROPS) || whitelistedCrop) {
             if (state.hasProperty(BlockStateProperties.AGE_1)) {
@@ -90,7 +91,7 @@ public class CropUtil {
         return false;
     }
 
-    private static boolean isValidStem(LevelReader level, BlockPos pos, Direction direction) {
+    private static boolean isValidStem(BlockGetter level, BlockPos pos, Direction direction) {
         BlockState state = level.getBlockState(pos);
         if (state.getBlock() instanceof AttachedStemBlock) {
             Direction property = state.getValue(AttachedStemBlock.FACING);
@@ -101,18 +102,22 @@ public class CropUtil {
 
 
     // TODO : Should probably check here that it has one of the age properties if its from the tag system
-    public static boolean isCrop(BlockState state) {
+    public static boolean isCrop(BlockState state, LevelAccessor level, BlockPos pos) {
         boolean isCrop = state.getBlock() instanceof CropBlock
                 || state.getBlock() instanceof HarvestableBlock
                 || state instanceof HarvestableState
                 || state.is(HARVESTABLE_CROPS)
-                || StrawgolemConfig.Harvesting.shouldHarvestBlocks.get() && state.getBlock() instanceof StemGrownBlock;
+                || StrawgolemConfig.Harvesting.shouldHarvestBlocks.get() && isStemGrownBlock(level, pos);
         if (StrawgolemConfig.Harvesting.enableWhitelist.get()) {
             return isCrop || isWhitelisted(state.getBlock());
         }
         return isCrop && !isBlacklisted(state.getBlock());
     }
 
+    public static boolean isStemGrownBlock(BlockGetter level, BlockPos pos) {
+        return Arrays.stream(Direction.values())
+                .anyMatch(direction -> isValidStem(level, pos.offset(direction.getNormal()), direction.getOpposite()));
+    }
     private static boolean isBlacklisted(Block block) {
         ResourceLocation location = BuiltInRegistries.BLOCK.getKey(block);
         return BLACKLISTED_CROPS.contains(location);

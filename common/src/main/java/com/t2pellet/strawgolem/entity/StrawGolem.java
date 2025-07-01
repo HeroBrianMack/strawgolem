@@ -654,7 +654,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
                         }
                     }
                 } else if (b.value() instanceof FruitGetter stem) {
-                    validPickupItems.add(BuiltInRegistries.BLOCK.get(stem.getFruit()).asItem());
+                    validPickupItems.add(BuiltInRegistries.BLOCK.get(stem.golemGetFruit()).asItem());
                 }
             }
         }
@@ -673,7 +673,8 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
 
     public boolean isHoldingBlock() {
         Item item = heldItem.get().getItem();
-        return item instanceof BlockItem blockItem && blockItem.getBlock() instanceof StemGrownBlock;
+        // not having StemGrownBlock may cause issues...
+        return item instanceof BlockItem /*blockItem && blockItem.getBlock() instanceof StemGrownBlock*/;
     }
 
     @SafeVarargs
