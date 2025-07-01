@@ -114,6 +114,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     private boolean isFirstTick = true;
 
     private static Set<Item> validPickupItems;
+    private static Set<Block> stemGrownBlocks;
     // For those looking at this code being confused, this is for the test(T) method for predicate.
     public Predicate<ItemEntity> validGolemItems = this::canHoldItem;
 
@@ -622,7 +623,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
         }
 
         validPickupItems = new HashSet<>();
-
+        stemGrownBlocks = new HashSet<>();
 
         if (!StrawgolemConfig.Experimental.pickupWhiteList.get()) {
             ResourceLocation location = new ResourceLocation(StrawgolemConfig.Experimental.pickupType.get());
@@ -655,6 +656,7 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
                     }
                 } else if (b.value() instanceof FruitGetter stem) {
                     validPickupItems.add(BuiltInRegistries.BLOCK.get(stem.golemGetFruit()).asItem());
+                    stemGrownBlocks.add(BuiltInRegistries.BLOCK.get(stem.golemGetFruit()));
                 }
             }
         }
@@ -674,8 +676,16 @@ public static final TagKey<Item> BARREL_ITEM = TagKey.create(Registries.ITEM, ne
     public boolean isHoldingBlock() {
         Item item = heldItem.get().getItem();
         // not having StemGrownBlock may cause issues...
-        return item instanceof BlockItem /*blockItem && blockItem.getBlock() instanceof StemGrownBlock*/;
+        return item instanceof BlockItem blockItem && stemGrownBlocks.contains(blockItem.getBlock())/*blockItem && blockItem.getBlock() instanceof StemGrownBlock*/;
     }
+
+    public static boolean isStemGrownBlock(BlockState block) {
+        return stemGrownBlocks.contains(block.getBlock());
+    }
+    public static boolean isStemGrownBlock(Block block) {
+        return stemGrownBlocks.contains(block);
+    }
+
 
     @SafeVarargs
     public final boolean isRunningGoal(Class<? extends Goal>... classes) {

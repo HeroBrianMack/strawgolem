@@ -1,14 +1,12 @@
 package com.t2pellet.strawgolem.util.crop;
 
 import com.t2pellet.strawgolem.compat.api.Seed;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SeedUtil {
@@ -17,10 +15,10 @@ public class SeedUtil {
 
     private SeedUtil() {}
 
-    public static boolean isSeed(ItemStack item, Level level, BlockPos pos) {
+    public static boolean isSeed(ItemStack item) {
         if (item.getItem() instanceof ItemNameBlockItem seed) {
             BlockState state = seed.getBlock().defaultBlockState();
-            if (CropUtil.isCrop(state, level, pos)) return true;
+            if (CropUtil.isCrop(state)) return true;
         } else if (item.getItem() instanceof Seed) {
             return true;
         } else return item.is(SEEDS);
